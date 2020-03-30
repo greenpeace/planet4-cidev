@@ -159,7 +159,7 @@ job_definitions:
       - run: activate-gcloud-account.sh
       - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make -j2 deploy
 
-    backstop_history_steps: &backstop_history_steps
+  backstop_history_steps: &backstop_history_steps
     docker:
       - image: greenpeaceinternational/planet4-backstop:latest
     working_directory: /src
