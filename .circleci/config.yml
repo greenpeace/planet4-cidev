@@ -2,7 +2,10 @@
 version: 2.1
 
 parameters:
-  release_hold:
+  production_hold:
+    type: boolean
+    default: false
+  production_finish:
     type: boolean
     default: false
 
@@ -348,7 +351,7 @@ workflows:
             - test-release
 
   production-hold:
-    when: << pipeline.parameters.release_hold >>
+    when: << pipeline.parameters.production_hold >>
     jobs:
       - hold-release:
           <<: *production_common
@@ -363,7 +366,7 @@ workflows:
             - build-production
 
   production:
-    unless: << pipeline.parameters.release_hold >>
+    unless: << pipeline.parameters.production_finish >>
     jobs:
       - build-production:
           <<: *production_common
