@@ -366,7 +366,7 @@ workflows:
             - build-production
 
   production:
-    unless: << pipeline.parameters.production_finish >>
+    when: << pipeline.parameters.production_finish >>
     jobs:
       - build-production:
           <<: *production_common
