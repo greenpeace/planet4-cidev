@@ -1,19 +1,14 @@
+---
 version: 2.1
 
 parameters:
-  run_release_init:
-    type: boolean
-    default: true
-  run_release_hold:
-    type: boolean
-    default: false
-  run_release_finish:
+  release_hold:
     type: boolean
     default: false
 
 defaults: &defaults
   docker:
-    - image: greenpeaceinternational/p4-builder:wp-test
+    - image: greenpeaceinternational/p4-builder:release-new
 
 job_environments:
   common_environment: &common_environment
@@ -49,12 +44,41 @@ job_environments:
     GOOGLE_PROJECT_ID: planet4-production
     HELM_NAMESPACE: cidev
     HELM_RELEASE: planet4-cidev-master
-    MIN_REPLICA_COUNT: 2
     NEWRELIC_APPNAME: P4 cidev Production
     WP_DB_NAME: planet4-cidev_wordpress_master
     WP_STATELESS_BUCKET: planet4-cidev-stateless
 
 job_definitions:
+  visualtests_reference_steps: &visualtests_reference_steps
+    docker:
+      - image: greenpeaceinternational/planet4-backstop:release-new
+    working_directory: /src
+    steps:
+      - run: ./checkout.sh
+      - run: ./mergescenarios.sh
+      - run: mkdir /app/ -p
+      - run: ./makehistory.sh
+      - store_artifacts:
+          path: /app/backstop_data
+      - persist_to_workspace:
+          root: /app
+          paths:
+            - backstop_data
+
+  visualtests_compare_steps: &visualtests_compare_steps
+    docker:
+      - image: greenpeaceinternational/planet4-backstop:release-new
+    working_directory: /src
+    steps:
+      - run: ./checkout.sh
+      - run: ./mergescenarios.sh
+      - run: mkdir /app/ -p
+      - attach_workspace:
+          at: /app
+      - run: ./makecomparison.sh
+      - store_artifacts:
+          path: /app/backstop_data
+
   build_steps: &build_steps
     working_directory: ~/
     steps:
@@ -110,47 +134,6 @@ job_definitions:
       - store_artifacts:
           path: /tmp/artifacts
 
-  prepare_release: &prepare_release
-    working_directory: /tmp/workspace/src
-    steps:
-      - checkout
-      - run: release-prepare-nro.sh
-      - run:
-          name: Notify failure
-          when: on_fail
-          command: TYPE="Prepare" notify-job-failure.sh
-
-  notify_promote: &notify_promote
-    working_directory: ~/project
-    steps:
-      - checkout
-      - run:
-          name: notify
-          command: |
-            TYPE="@rawalker Promote release/$(increment-version.sh "$(git-current-tag.sh)")" \
-            EXTRA_TEXT="Verify: https://$APP_HOSTNAME/$APP_HOSTPATH" \
-            notify-job-hold.sh
-
-  notify_hold: &notify_hold
-    working_directory: ~/project
-    steps:
-      - checkout
-      - run:
-          name: notify
-          command: |
-            TYPE="@rawalker Hold: ${CIRCLE_TAG}" \
-            EXTRA_TEXT="Verify: https://$APP_HOSTNAME/$APP_HOSTPATH" \
-            notify-job-hold.sh
-
-  finish_release: &finish_release
-    steps:
-      - checkout
-      - run: release-finish.sh
-      - run:
-          name: Notify failure
-          when: on_fail
-          command: TYPE="Promote" notify-job-failure.sh
-
   deploy_steps: &deploy_steps
     working_directory: ~/
     steps:
@@ -159,54 +142,37 @@ job_definitions:
       - run: activate-gcloud-account.sh
       - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make -j2 deploy
 
-  backstop_history_steps: &backstop_history_steps
-    docker:
-      - image: greenpeaceinternational/planet4-backstop:latest
-    working_directory: /src
-    steps:
-      - run: ./checkout.sh
-      - run: ./mergescenarios.sh
-      - run: mkdir /app/ -p
-      - run: ./makehistory.sh
-      - store_artifacts:
-          path: /app/backstop_data
-      - persist_to_workspace:
-          root: /app
-          paths:
-            - backstop_data
-
-  backstop_compare_steps: &backstop_compare_steps
-    docker:
-      - image: greenpeaceinternational/planet4-backstop:latest
-    working_directory: /src
-    steps:
-      - run: ./checkout.sh
-      - run: ./mergescenarios.sh
-      - run: mkdir /app/ -p
-      - attach_workspace:
-          at: /app
-      - run: ./makecomparison.sh
-      - store_artifacts:
-          path: /app/backstop_data
-
 jobs:
-  build-branch:
+  visualtests-reference-develop:
+    environment:
+      <<: *common_environment
+      <<: *develop_environment
+    <<: *visualtests_reference_steps
+
+  visualtests-reference:
+    environment:
+      <<: *common_environment
+      <<: *release_environment
+    <<: *visualtests_reference_steps
+
+  visualtests-compare-develop:
+    environment:
+      <<: *common_environment
+      <<: *develop_environment
+    <<: *visualtests_compare_steps
+
+  visualtests-compare:
+    environment:
+      <<: *common_environment
+      <<: *release_environment
+    <<: *visualtests_compare_steps
+
+  build-develop:
     <<: *defaults
     environment:
       <<: *common_environment
       <<: *develop_environment
     <<: *build_steps
-
-  prepare-release:
-    <<: *defaults
-    <<: *prepare_release
-
-  notify-promote:
-    <<: *defaults
-    <<: *notify_promote
-    environment:
-      <<: *common_environment
-      <<: *release_environment
 
   build-release:
     <<: *defaults
@@ -215,23 +181,12 @@ jobs:
       <<: *release_environment
     <<: *build_steps
 
-  finish-release:
-    <<: *defaults
-    <<: *finish_release
-
-  build-tag:
+  build-production:
     <<: *defaults
     environment:
       <<: *common_environment
       <<: *production_environment
     <<: *build_steps
-
-  notify-hold:
-    <<: *defaults
-    environment:
-      <<: *common_environment
-      <<: *production_environment
-    <<: *notify_hold
 
   test-develop:
     environment:
@@ -259,7 +214,7 @@ jobs:
       <<: *release_environment
     <<: *deploy_steps
 
-  deploy-tag:
+  deploy-production:
     <<: *defaults
     environment:
       <<: *common_environment
@@ -276,7 +231,6 @@ jobs:
       - checkout
       - attach_workspace:
           at: /tmp/workspace
-
       - run:
           name: Configure
           command: |
@@ -284,7 +238,7 @@ jobs:
       - run: echo $SQLPROXY_KEY | base64 -d > key.json
       - run: /home/circleci/sql_create_sync_file.sh
 
-  sync-sql-to-release:
+  sync-to-release:
     <<: *defaults
     environment:
       <<: *common_environment
@@ -301,7 +255,7 @@ jobs:
       - run: echo $SQLPROXY_KEY | base64 -d > key.json
       - run: /home/circleci/sql_to_sync_site.sh release
 
-  sync-sql-to-develop:
+  sync-to-develop:
     <<: *defaults
     environment:
       <<: *common_environment
@@ -318,29 +272,18 @@ jobs:
       - run: echo $SQLPROXY_KEY | base64 -d > key.json
       - run: /home/circleci/sql_to_sync_site.sh develop
 
-  backstop-history-develop:
+  backup:
+    docker:
+      - image: greenpeaceinternational/planet4-backup:latest
     environment:
       <<: *common_environment
-      <<: *develop_environment
-    <<: *backstop_history_steps
-
-  backstop-compare-develop:
-    environment:
-      <<: *common_environment
-      <<: *develop_environment
-    <<: *backstop_compare_steps
-
-  backstop-history-release:
-    environment:
-      <<: *common_environment
-      <<: *release_environment
-    <<: *backstop_history_steps
-
-  backstop-compare-release:
-    environment:
-      <<: *common_environment
-      <<: *release_environment
-    <<: *backstop_compare_steps
+      <<: *production_environment
+    working_directory: /app
+    steps:
+      - run: echo "backup is running"
+      - run: pwd
+      - run: ls
+      - run: ./go.sh
 
 workflow_definitions:
   develop_common: &develop_common
@@ -352,114 +295,82 @@ workflow_definitions:
     context: org-global
     filters:
       branches:
-        only: /^release.*/
-  tag_common: &tag_common
+        ignore: /.*/
+      tags:
+        only: /^v.*/
+  production_common: &production_common
     context: org-global
     filters:
       branches:
         ignore: /.*/
-      tags:
-        only: /^v\p{Digit}+\.\p{Digit}+\.\p{Digit}+.*/
-  sync_common: &sync_common
-    context: org-global
-    filters:
-      branches:
-        ignore: /.*/
-      tags:
-        only: /sync.*/
 
 workflows:
-  version: 2
   develop:
     jobs:
-      - backstop-history-develop:
+      - visualtests-reference-develop:
           <<: *develop_common
-      - build-branch:
+      - build-develop:
           <<: *develop_common
-          requires:
-            - backstop-history-develop
       - deploy-develop:
           <<: *develop_common
           requires:
-            - build-branch
+            - build-develop
+            - visualtests-reference-develop
       - test-develop:
           <<: *develop_common
           requires:
             - deploy-develop
-      - backstop-compare-develop:
-          <<: *develop_common
-          requires:
-            - deploy-develop
-      - prepare-release:
+      - visualtests-compare-develop:
           <<: *develop_common
           requires:
             - deploy-develop
 
-  release-init:
-    when: << pipeline.parameters.run_release_init >>
+  release:
     jobs:
-      - backstop-history-release:
+      - visualtests-reference:
           <<: *release_common
       - build-release:
           <<: *release_common
-          requires:
-            - backstop-history-release
       - deploy-release:
           <<: *release_common
           requires:
             - build-release
+            - visualtests-reference
       - test-release:
           <<: *release_common
           requires:
             - deploy-release
-      - backstop-compare-release:
+      - visualtests-compare:
           <<: *release_common
           requires:
-            - test-release
+            - deploy-release
 
-  release-hold-and-finish:
-    when: << pipeline.parameters.run_release_hold >>
+  production-hold:
+    when: << pipeline.parameters.release_hold >>
     jobs:
-      - notify-promote:
-          <<: *release_common
-      - hold-promote:
-          <<: *release_common
+      - hold-release:
+          <<: *production_common
           type: approval
-      - finish-release:
-          <<: *release_common
+      - build-production:
+          <<: *production_common
+          requires: 
+            - hold-release
+      - deploy-production:
+          <<: *production_common
           requires:
-            - hold-promote
-            - notify-promote
+            - build-production
 
-  release-finish:
-    when: << pipeline.parameters.run_release_finish >>
+  production:
+    unless: << pipeline.parameters.release_hold >>
     jobs:
-      - finish-release:
-          <<: *release_common
-
-  tag:
-    jobs:
-      - build-tag:
-          <<: *tag_common
-      - deploy-tag:
-          <<: *tag_common
+      - build-production:
+          <<: *production_common
+      - deploy-production:
+          <<: *production_common
           requires:
-            - build-tag
+            - build-production
 
-  create-sync-sql:
-    jobs:
-      - create-sync-sql:
-          <<: *sync_common
-      - sync-sql-to-release:
-          <<: *sync_common
-          requires:
-            - create-sync-sql
-      - sync-sql-to-develop:
-          <<: *sync_common
-          requires:
-            - sync-sql-to-release
-
-  create-sync-auto:
+  sync-from-production:
     triggers:
       - schedule:
           cron: "10 01 1 * *"
@@ -470,11 +381,23 @@ workflows:
     jobs:
       - create-sync-sql:
           context: org-global
-      - sync-sql-to-release:
+      - sync-to-release:
           context: org-global
           requires:
             - create-sync-sql
-      - sync-sql-to-develop:
+      - sync-to-develop:
           context: org-global
           requires:
-            - sync-sql-to-release
+            - create-sync-sql
+
+  backup:
+    triggers:
+      - schedule:
+          cron: "30 02 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - backup:
+          context: org-global
