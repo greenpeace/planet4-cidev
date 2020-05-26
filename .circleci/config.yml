@@ -2,6 +2,9 @@
 version: 2.1
 
 parameters:
+  release_init:
+    type: boolean
+    default: true
   production_hold:
     type: boolean
     default: false
@@ -331,6 +334,7 @@ workflows:
             - deploy-develop
 
   release:
+    when: << pipeline.parameters.release_init >>
     jobs:
       - visualtests-reference:
           <<: *release_common
