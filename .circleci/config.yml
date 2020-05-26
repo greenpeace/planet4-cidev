@@ -8,7 +8,7 @@ parameters:
   production_hold:
     type: boolean
     default: false
-  production_finish:
+  production_deploy:
     type: boolean
     default: false
 
@@ -370,7 +370,7 @@ workflows:
             - build-production
 
   production:
-    when: << pipeline.parameters.production_finish >>
+    when: << pipeline.parameters.production_deploy >>
     jobs:
       - build-production:
           <<: *production_common
