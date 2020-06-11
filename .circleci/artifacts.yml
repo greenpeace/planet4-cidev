@@ -14,7 +14,7 @@ job_environments:
     NEWRELIC_APPNAME: P4 cidev Development
     WP_DB_NAME: planet4-cidev_wordpress_develop
     WP_STATELESS_BUCKET: planet4-cidev-stateless-develop
-  staging_environment: &staging_environment
+  release_environment: &release_environment
     APP_ENVIRONMENT: staging
     APP_HOSTNAME: release.k8s.p4.greenpeace.org
     CLOUDSQL_INSTANCE: planet4-prod
