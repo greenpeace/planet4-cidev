@@ -222,7 +222,7 @@ jobs:
     working_directory: /tmp/workspace/src
     steps:
       - checkout
-      - run: promote-to-production.sh ${CIRCLE_WORKFLOW_ID}
+      - run: promote-to-production.sh "${CIRCLE_WORKFLOW_ID}"
 
   trigger-production:
     <<: *defaults
@@ -231,7 +231,7 @@ jobs:
     working_directory: /tmp/workspace/src
     steps:
       - checkout
-      - run: trigger-production.sh ${CIRCLE_PROJECT_REPONAME} ${CIRCLE_TAG}
+      - run: trigger-production.sh "${CIRCLE_PROJECT_REPONAME}" "${CIRCLE_TAG}"
 
   build-production:
     <<: *defaults
