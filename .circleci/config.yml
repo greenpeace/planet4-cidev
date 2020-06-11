@@ -210,6 +210,7 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
+      <<: *develop_environment
     working_directory: /tmp/workspace/src
     steps:
       - checkout
@@ -328,11 +329,6 @@ workflow_definitions:
     filters:
       branches:
         only: develop
-  promote_common: &promote_common
-    context: org-global
-    filters:
-      branches:
-        only: develop
   staging_common: &staging_common
     context: org-global
     filters:
@@ -368,6 +364,10 @@ workflows:
           <<: *develop_common
           requires:
             - deploy-develop
+      - merge-develop:
+          <<: *develop_common
+          requires:
+            - build-develop
   promote:
     jobs:
       - merge-develop:
