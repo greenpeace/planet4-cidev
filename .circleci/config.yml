@@ -356,6 +356,7 @@ workflows:
           requires:
             - build-develop
             - visualtests-reference-develop
+            - merge-develop
       - test-develop:
           <<: *develop_common
           requires:
@@ -389,14 +390,17 @@ workflows:
           requires:
             - deploy-staging
       - hold-production:
+          <<: *staging_common
           type: approval
           requires:
             - test-staging
       - promote:
+          <<: *staging_common
           requires:
             - test-staging
             - visualtests-compare
       - trigger-production:
+          <<: *staging_common
           requires:
             - hold-production
   production:
