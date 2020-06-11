@@ -368,11 +368,6 @@ workflows:
           <<: *develop_common
           requires:
             - build-develop
-  promote:
-    jobs:
-      - merge-develop:
-          <<: *promote_common
-
   staging:
     unless:
       not:
