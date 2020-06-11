@@ -215,6 +215,21 @@ jobs:
     steps:
       - checkout
       - run: merge-develop.sh
+  promote:
+    <<: *defaults
+    environment:
+      <<: *common_environment
+    steps:
+      - checkout
+      - run: ./promote-to-production.sh ${CIRCLE_WORKFLOW_ID}
+
+  trigger-production:
+    <<: *defaults
+    environment:
+      <<: *common_environment
+    steps:
+      - checkout
+      - run: ./trigger-production.sh ${CIRCLE_PROJECT_REPONAME} ${CIRCLE_TAG}
 
   build-production:
     <<: *defaults
@@ -229,24 +244,6 @@ jobs:
       <<: *common_environment
       <<: *production_environment
     <<: *deploy_steps
-
-  promote:
-    <<: *defaults
-    environment:
-      <<: *common_environment
-    working_directory: /src
-    steps:
-      - checkout
-      - run: ./promote-to-production.sh ${CIRCLE_WORKFLOW_ID}
-
-  trigger-production:
-    <<: *defaults
-    environment:
-      <<: *common_environment
-    working_directory: /src
-    steps:
-      - checkout
-      - run: ./trigger-production.sh ${CIRCLE_PROJECT_REPONAME} ${CIRCLE_TAG}
 
   create-sync-sql:
     <<: *defaults
