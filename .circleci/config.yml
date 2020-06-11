@@ -219,6 +219,7 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
+    working_directory: ~/
     steps:
       - checkout
       - run: ./promote-to-production.sh ${CIRCLE_WORKFLOW_ID}
@@ -227,6 +228,7 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
+    working_directory: ~/
     steps:
       - checkout
       - run: ./trigger-production.sh ${CIRCLE_PROJECT_REPONAME} ${CIRCLE_TAG}
