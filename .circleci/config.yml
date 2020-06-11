@@ -366,8 +366,6 @@ workflows:
             - deploy-develop
       - merge-develop:
           <<: *develop_common
-          requires:
-            - build-develop
   staging:
     unless:
       not:
