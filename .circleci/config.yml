@@ -177,33 +177,33 @@ jobs:
   visualtests-reference:
     environment:
       <<: *common_environment
-      <<: *staging_environment
+      <<: *release_environment
     <<: *visualtests_reference_steps
 
   visualtests-compare:
     environment:
       <<: *common_environment
-      <<: *staging_environment
+      <<: *release_environment
     <<: *visualtests_compare_steps
 
   build-staging:
     <<: *defaults
     environment:
       <<: *common_environment
-      <<: *staging_environment
+      <<: *release_environment
     <<: *build_steps
 
   test-staging:
     environment:
       <<: *common_environment
-      <<: *staging_environment
+      <<: *release_environment
     <<: *test_steps
 
   deploy-staging:
     <<: *defaults
     environment:
       <<: *common_environment
-      <<: *staging_environment
+      <<: *release_environment
     <<: *deploy_steps
 
   merge-develop:
@@ -268,7 +268,7 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
-      <<: *staging_environment
+      <<: *release_environment
     working_directory: /tmp/workspace/src
     steps:
       - checkout
