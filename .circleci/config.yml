@@ -222,7 +222,9 @@ jobs:
     working_directory: /tmp/workspace/src
     steps:
       - checkout
-      - run: promote-to-production.sh "${CIRCLE_WORKFLOW_ID}"
+      - run:
+          name: Approve promotion
+          command: promote-to-production.sh "${CIRCLE_WORKFLOW_ID}"
 
   trigger-production:
     <<: *defaults
