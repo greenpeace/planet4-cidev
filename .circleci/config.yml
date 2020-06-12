@@ -415,7 +415,7 @@ workflows:
       - deploy-production:
           <<: *production_common
           requires:
-            - build-tag
+            - build-production
 
   sync-from-production:
     triggers:
