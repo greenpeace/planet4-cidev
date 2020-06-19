@@ -8,7 +8,7 @@ parameters:
 
 defaults: &defaults
   docker:
-    - image: greenpeaceinternational/p4-builder:release-next
+    - image: greenpeaceinternational/p4-builder:latest
 job_environments:
   common_environment: &common_environment
     APP_HOSTPATH: cidev
@@ -50,7 +50,7 @@ job_environments:
 job_definitions:
   visualtests_reference_steps: &visualtests_reference_steps
     docker:
-      - image: greenpeaceinternational/planet4-backstop:release-next
+      - image: greenpeaceinternational/planet4-backstop:latest
     working_directory: /src
     steps:
       - run: ./checkout.sh
@@ -66,7 +66,7 @@ job_definitions:
 
   visualtests_compare_steps: &visualtests_compare_steps
     docker:
-      - image: greenpeaceinternational/planet4-backstop:release-next
+      - image: greenpeaceinternational/planet4-backstop:latest
     working_directory: /src
     steps:
       - run: ./checkout.sh
