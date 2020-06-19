@@ -208,6 +208,9 @@ jobs:
 
   merge-develop:
     <<: *defaults
+    environment:
+      <<: *common_environment
+      <<: *develop_environment
     working_directory: /tmp/workspace/src
     steps:
       - checkout
