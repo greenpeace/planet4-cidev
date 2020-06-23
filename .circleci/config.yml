@@ -73,6 +73,10 @@ job_definitions:
     docker:
       - image: greenpeaceinternational/planet4-backstop:latest
     working_directory: /src
+    parameters:
+      notify:
+        type: boolean
+        default: false
     steps:
       - run: ./checkout.sh
       - run: ./mergescenarios.sh
@@ -82,8 +86,11 @@ job_definitions:
       - run: ./makecomparison.sh
       - store_artifacts:
           path: /app/backstop_data
-      - slack/status:
-          channel: D01433MK3AQ
+      - when:
+        condition: << parameters.notify >>
+        steps:
+        - slack/status:
+            channel: D01433MK3AQ
 
   build_steps: &build_steps
     working_directory: ~/
@@ -397,6 +404,7 @@ workflows:
             - deploy-staging
       - visualtests-compare:
           <<: *staging_common
+          notify: true
           requires:
             - deploy-staging
       - hold-production:
