@@ -1,5 +1,6 @@
 ---
 version: 2.1
+
 parameters:
   release_stage:
     type: enum
@@ -9,6 +10,10 @@ parameters:
 defaults: &defaults
   docker:
     - image: greenpeaceinternational/p4-builder:latest
+
+orbs:
+  slack: circleci/slack@3.4.2
+
 job_environments:
   common_environment: &common_environment
     APP_HOSTPATH: cidev
@@ -77,6 +82,8 @@ job_definitions:
       - run: ./makecomparison.sh
       - store_artifacts:
           path: /app/backstop_data
+      - slack/status:
+          channel: D01433MK3AQ
 
   build_steps: &build_steps
     working_directory: ~/
