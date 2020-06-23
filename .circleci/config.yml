@@ -78,14 +78,17 @@ job_definitions:
         type: boolean
         default: false
     steps:
-      - run: ./checkout.sh
-      - run: ./mergescenarios.sh
-      - run: mkdir /app/ -p
-      - attach_workspace:
-          at: /app
-      - run: ./makecomparison.sh
-      - store_artifacts:
-          path: /app/backstop_data
+      - unless:
+        condition: << parameters.notify >>
+        steps:
+        - run: ./checkout.sh
+        - run: ./mergescenarios.sh
+        - run: mkdir /app/ -p
+        - attach_workspace:
+            at: /app
+        - run: ./makecomparison.sh
+        - store_artifacts:
+            path: /app/backstop_data
       - when:
         condition: << parameters.notify >>
         steps:
