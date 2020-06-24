@@ -155,7 +155,7 @@ job_definitions:
           at: /tmp/workspace
       - run: activate-gcloud-account.sh
       - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make -j2 deploy
-    - when:
+      - when:
           condition: << parameters.notify >>
           steps:
             - slack/status:
