@@ -92,7 +92,7 @@ job_definitions:
             - slack/status:
                 fail_only: true
                 channel: C015MQGG3KQ
-                webhook: https://hooks.slack.com/services/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
+                webhook: ${SLACK_NRO_WEBHOOK}
 
   build_steps: &build_steps
     working_directory: ~/
@@ -165,7 +165,7 @@ job_definitions:
           steps:
             - slack/status:
                 channel: C015MQGG3KQ
-                webhook: https://hooks.slack.com/services/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
+                webhook: ${SLACK_NRO_WEBHOOK}
 
 jobs:
   visualtests-reference-develop:
