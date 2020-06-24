@@ -90,8 +90,9 @@ job_definitions:
           condition: << parameters.notify >>
           steps:
             - slack/status:
-                channel: D01433MK3AQ
-                # webhook: https://hooks.slack.com/services/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
+                fail_only: true
+                channel: C015MQGG3KQ
+                webhook: https://hooks.slack.com/services/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
 
   build_steps: &build_steps
     working_directory: ~/
@@ -150,11 +151,21 @@ job_definitions:
 
   deploy_steps: &deploy_steps
     working_directory: ~/
+    parameters:
+      notify:
+        type: boolean
+        default: false
     steps:
       - attach_workspace:
           at: /tmp/workspace
       - run: activate-gcloud-account.sh
       - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make -j2 deploy
+      - when:
+          condition: << parameters.notify >>
+          steps:
+            - slack/status:
+                channel: C015MQGG3KQ
+                webhook: https://hooks.slack.com/services/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
 
 jobs:
   visualtests-reference-develop:
@@ -430,6 +441,7 @@ workflows:
           <<: *production_common
       - deploy-production:
           <<: *production_common
+          notify: true
           requires:
             - build-production
 
