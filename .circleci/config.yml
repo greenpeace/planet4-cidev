@@ -9,6 +9,9 @@ parameters:
 defaults: &defaults
   docker:
     - image: greenpeaceinternational/p4-builder:latest
+
+orbs:
+  slack: circleci/slack@3.4.2
 job_environments:
   common_environment: &common_environment
     APP_HOSTPATH: cidev
