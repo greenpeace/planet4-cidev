@@ -69,24 +69,14 @@ job_definitions:
           paths:
             - backstop_data
 
-  visualtests_compare_steps_develop: &visualtests_compare_steps_develop
-    docker:
-      - image: greenpeaceinternational/planet4-backstop:latest
-    working_directory: /src
-    steps:
-      - run: ./checkout.sh
-      - run: ./mergescenarios.sh
-      - run: mkdir /app/ -p
-      - attach_workspace:
-          at: /app
-      - run: ./makecomparison.sh
-      - store_artifacts:
-          path: /app/backstop_data
-
   visualtests_compare_steps: &visualtests_compare_steps
     docker:
       - image: greenpeaceinternational/planet4-backstop:latest
     working_directory: /src
+    parameters:
+      notify:
+        type: boolean
+        default: false
     steps:
       - run: ./checkout.sh
       - run: ./mergescenarios.sh
@@ -96,8 +86,12 @@ job_definitions:
       - run: ./makecomparison.sh
       - store_artifacts:
           path: /app/backstop_data
-      - slack/status:
-          channel: D01433MK3AQ
+      - when:
+          condition: << parameters.notify >>
+          steps:
+            - slack/status:
+                channel: D01433MK3AQ
+                # webhook: https://hooks.slack.com/services/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
 
   build_steps: &build_steps
     working_directory: ~/
@@ -173,7 +167,7 @@ jobs:
     environment:
       <<: *common_environment
       <<: *develop_environment
-    <<: *visualtests_compare_steps_develop
+    <<: *visualtests_compare_steps
 
   build-develop:
     <<: *defaults
@@ -411,6 +405,7 @@ workflows:
             - deploy-staging
       - visualtests-compare:
           <<: *staging_common
+          notify: true
           requires:
             - deploy-staging
       - hold-production:
