@@ -3,7 +3,7 @@
 	"description": "Greenpeace P4 cidev",
 	"license": "MIT",
 	"require": {
-		"greenpeace/planet4-master-theme" : "dev-master",
+		"greenpeace/planet4-master-theme" : "dev-planet-5142",
 		"greenpeace/planet4-plugin-gutenberg-blocks" : "dev-planet-5142",
 		"greenpeace/planet4-plugin-gutenberg-engagingnetworks" : "dev-master"
 	},
