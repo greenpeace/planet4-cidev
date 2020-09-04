@@ -172,7 +172,7 @@ job_definitions:
       - unless:
           condition: << parameters.build_num >>
           steps:
-            - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make -j2 deploy
+            - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make deploy
       - when:
           condition: << parameters.notify >>
           steps:
