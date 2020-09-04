@@ -168,7 +168,7 @@ job_definitions:
       - when:
           condition: << parameters.build_num >>
           steps:
-            - run: BUILD_TAG=build-<< parameters.build_num >> make -j2 deploy
+            - run: BUILD_TAG=build-<< parameters.build_num >> make deploy
       - unless:
           condition: << parameters.build_num >>
           steps:
