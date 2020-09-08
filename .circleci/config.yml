@@ -113,6 +113,9 @@ job_definitions:
       - run: activate-gcloud-account.sh
       - run: mkdir -p /tmp/workspace/var
       - run: mkdir -p /tmp/workspace/src
+      - run:
+          name: Store current build number
+          command: echo "$(helm status planet4-cidev-release|grep build-|head -1|awk -F: '{print $2}')" > /tmp/workspace/var/circle-previous-build-num
       - run: echo "${CIRCLE_BUILD_NUM}" > /tmp/workspace/var/circle-build-num
       - run: make
       - run:
@@ -168,7 +171,7 @@ job_definitions:
       - when:
           condition: << parameters.build_num >>
           steps:
-            - run: BUILD_TAG=build-<< parameters.build_num >> make deploy
+            - run: BUILD_TAG=<< parameters.build_num >> make deploy
       - unless:
           condition: << parameters.build_num >>
           steps:
