@@ -165,7 +165,6 @@ job_definitions:
       - attach_workspace:
           at: /tmp/workspace
       - run: activate-gcloud-account.sh
-      - run: previous_build_num.sh ${HELM_RELEASE}
       - when:
           condition: << parameters.build_num >>
           steps:
