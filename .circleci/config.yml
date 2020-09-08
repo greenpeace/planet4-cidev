@@ -85,6 +85,7 @@ job_definitions:
       - run: mkdir /app/ -p
       - attach_workspace:
           at: /app
+          at: /tmp/workspace
       - run: ./makecomparison.sh
       - store_artifacts:
           path: /app/backstop_data
@@ -180,6 +181,10 @@ job_definitions:
             - slack/status:
                 channel: C015MQGG3KQ
                 webhook: ${SLACK_NRO_WEBHOOK}
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - var
 
 jobs:
   visualtests-reference-develop:
