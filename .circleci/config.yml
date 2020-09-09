@@ -1,14 +1,15 @@
 ---
 version: 2.1
+
 parameters:
   release_stage:
     type: enum
     default: "staging"
-    enum: ["staging", "production"]
+    enum: ["staging", "production", "rollback"]
 
 defaults: &defaults
   docker:
-    - image: greenpeaceinternational/p4-builder:latest
+    - image: greenpeaceinternational/p4-builder:rollback
 
 orbs:
   slack: circleci/slack@3.4.2
@@ -53,7 +54,7 @@ job_environments:
 job_definitions:
   visualtests_reference_steps: &visualtests_reference_steps
     docker:
-      - image: greenpeaceinternational/planet4-backstop:latest
+      - image: greenpeaceinternational/planet4-backstop:rollback
     working_directory: /src
     steps:
       - run: ./checkout.sh
@@ -69,7 +70,7 @@ job_definitions:
 
   visualtests_compare_steps: &visualtests_compare_steps
     docker:
-      - image: greenpeaceinternational/planet4-backstop:latest
+      - image: greenpeaceinternational/planet4-backstop:rollback
     working_directory: /src
     parameters:
       notify:
@@ -239,6 +240,15 @@ jobs:
       <<: *release_environment
     <<: *deploy_steps
 
+  rollback-staging:
+    <<: *defaults
+    environment:
+      <<: *common_environment
+      <<: *release_environment
+    steps:
+      - run: activate-gcloud-account.sh
+      - run: make rollback
+
   merge-develop:
     <<: *defaults
     environment:
@@ -403,6 +413,7 @@ workflows:
             - deploy-develop
       - merge-develop:
           <<: *develop_common
+
   staging:
     unless:
       not:
@@ -440,6 +451,19 @@ workflows:
           <<: *staging_common
           requires:
             - hold-production
+
+  rollback-staging:
+    when:
+      equal: [ "rollback", << pipeline.parameters.release_stage >> ]
+    jobs:
+      - hold-rollback:
+          <<: *staging_common
+          type: approval
+      - rollback-staging:
+          <<: *staging_common
+          requires:
+            - hold-rollback
+
   production:
     when:
       equal: [ "production", << pipeline.parameters.release_stage >> ]
