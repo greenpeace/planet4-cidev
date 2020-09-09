@@ -168,7 +168,7 @@ job_definitions:
       - run:
           name: Get current deployed BUILD_NUM
           command: |
-            build_num="$(make buildnum)
+            build_num="$(make buildnum)"
             echo "export PREVIOUS_BUILD_NUM='${build_num}'" >> $BASH_ENV
             echo "$build_num"
       - when:
