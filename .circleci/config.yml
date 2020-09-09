@@ -85,8 +85,7 @@ job_definitions:
       - run: mkdir /app/ -p
       - attach_workspace:
           at: /app
-          at: /tmp/workspace
-      - run: ./makecomparison.sh
+      - run: ./makecomparison.sh "${PREVIOUS_BUILD_NUM}"
       - store_artifacts:
           path: /app/backstop_data
       - when:
@@ -166,6 +165,12 @@ job_definitions:
       - attach_workspace:
           at: /tmp/workspace
       - run: activate-gcloud-account.sh
+      - run:
+          name: Get current deployed BUILD_NUM
+          command: |
+            build_num="$(make buildnum)
+            echo "export PREVIOUS_BUILD_NUM='${build_num}'" >> $BASH_ENV
+            echo "$build_num"
       - when:
           condition: << parameters.build_num >>
           steps:
@@ -181,10 +186,6 @@ job_definitions:
             - slack/status:
                 channel: C015MQGG3KQ
                 webhook: ${SLACK_NRO_WEBHOOK}
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - var
 
 jobs:
   visualtests-reference-develop:
