@@ -1,14 +1,10 @@
 ---
 version: 2.1
-
 parameters:
   release_stage:
     type: enum
     default: "staging"
-    enum: ["staging", "production", "rollback"]
-  build_num:
-    type: string
-    default: ""
+    enum: ["staging", "production"]
 
 defaults: &defaults
   docker:
@@ -57,7 +53,7 @@ job_environments:
 job_definitions:
   visualtests_reference_steps: &visualtests_reference_steps
     docker:
-      - image: greenpeaceinternational/planet4-backstop:rollback
+      - image: greenpeaceinternational/planet4-backstop:latest
     working_directory: /src
     steps:
       - run: ./checkout.sh
@@ -73,7 +69,7 @@ job_definitions:
 
   visualtests_compare_steps: &visualtests_compare_steps
     docker:
-      - image: greenpeaceinternational/planet4-backstop:rollback
+      - image: greenpeaceinternational/planet4-backstop:latest
     working_directory: /src
     parameters:
       notify:
@@ -158,9 +154,6 @@ job_definitions:
       notify:
         type: boolean
         default: false
-      build_num:
-        type: string
-        default: ""
     steps:
       - attach_workspace:
           at: /tmp/workspace
@@ -240,13 +233,6 @@ jobs:
     <<: *test_steps
 
   deploy-staging:
-    <<: *defaults
-    environment:
-      <<: *common_environment
-      <<: *release_environment
-    <<: *deploy_steps
-
-  rollback-staging:
     <<: *defaults
     environment:
       <<: *common_environment
@@ -417,7 +403,6 @@ workflows:
             - deploy-develop
       - merge-develop:
           <<: *develop_common
-
   staging:
     unless:
       not:
@@ -455,20 +440,6 @@ workflows:
           <<: *staging_common
           requires:
             - hold-production
-
-  rollback-staging:
-    when:
-      equal: [ "rollback", << pipeline.parameters.release_stage >> ]
-    jobs:
-      - hold-rollback:
-          <<: *staging_common
-          type: approval
-      - rollback-staging:
-          <<: *staging_common
-          build_num: << pipeline.parameters.build_num >>
-          requires:
-            - hold-rollback
-
   production:
     when:
       equal: [ "production", << pipeline.parameters.release_stage >> ]
