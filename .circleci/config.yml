@@ -82,7 +82,7 @@ job_definitions:
       - run: mkdir /app/ -p
       - attach_workspace:
           at: /app
-      - run: ./makecomparison.sh "${PREVIOUS_BUILD_NUM}"
+      - run: ./makecomparison.sh
       - store_artifacts:
           path: /app/backstop_data
       - when:
@@ -159,14 +159,7 @@ job_definitions:
       - attach_workspace:
           at: /tmp/workspace
       - run: activate-gcloud-account.sh
-      - when:
-          condition: << parameters.build_num >>
-          steps:
-            - run: BUILD_TAG=<< parameters.build_num >> make deploy
-      - unless:
-          condition: << parameters.build_num >>
-          steps:
-            - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make deploy
+      - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make -j2 deploy
       - when:
           condition: << parameters.notify >>
           steps:
