@@ -174,14 +174,6 @@ job_definitions:
      - run: activate-gcloud-account.sh
      - run: make rollback
 
-  rollback_steps: &rollback_steps
-    working_directory: ~/
-    steps:
-      - attach_workspace:
-          at: /tmp/workspace
-      - run: activate-gcloud-account.sh
-      - run: make rollback
-
 jobs:
   visualtests-reference-develop:
     environment:
@@ -246,13 +238,6 @@ jobs:
       <<: *common_environment
       <<: *release_environment
     <<: *deploy_steps
-
-  rollback-staging:
-    <<: *defaults
-    environment:
-      <<: *common_environment
-      <<: *release_environment
-    <<: *rollback_steps
 
   merge-develop:
     <<: *defaults
