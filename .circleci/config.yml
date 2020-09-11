@@ -110,7 +110,7 @@ job_definitions:
       - run: make test
       - run: make rewrite
       - run: make checkout
-      - run: make rewrite-app-repose
+      - run: make rewrite-app-repos
       - run: make copy
       - run: make bake
       - run: make persist
