@@ -28,12 +28,13 @@ job_environments:
     NEWRELIC_APPNAME: P4 cidev Development
     WP_DB_NAME: planet4-cidev_wordpress_develop
     WP_STATELESS_BUCKET: planet4-cidev-stateless-develop
-  release_environment: &release_environment
-    APP_ENVIRONMENT: staging
-    APP_HOSTNAME: release.k8s.p4.greenpeace.org
+  release_and_prod_environment: &release_and_prod_environment
     CLOUDSQL_INSTANCE: planet4-prod
     GCLOUD_CLUSTER: planet4-production
     GOOGLE_PROJECT_ID: planet4-production
+  release_environment: &release_environment
+    APP_ENVIRONMENT: staging
+    APP_HOSTNAME: release.k8s.p4.greenpeace.org
     HELM_NAMESPACE: cidev
     HELM_RELEASE: planet4-cidev-release
     NEWRELIC_APPNAME: P4 cidev Release
@@ -41,9 +42,6 @@ job_environments:
     WP_STATELESS_BUCKET: planet4-cidev-stateless-release
   production_environment: &production_environment
     APP_HOSTNAME: www.greenpeace.org
-    CLOUDSQL_INSTANCE: planet4-prod
-    GCLOUD_CLUSTER: planet4-production
-    GOOGLE_PROJECT_ID: planet4-production
     HELM_NAMESPACE: cidev
     HELM_RELEASE: planet4-cidev-master
     NEWRELIC_APPNAME: P4 cidev Production
@@ -106,8 +104,8 @@ job_definitions:
             - composer-v5
       - run: |
           if [[ -d source/cache ]]; then ls -al source/cache; fi
-      - run: mkdir -p /tmp/workspace/var
-      - run: mkdir -p /tmp/workspace/src
+      - run: activate-gcloud-account.sh
+      - run: mkdir -p /tmp/workspace/var /tmp/workspace/src
       - run: echo "${CIRCLE_BUILD_NUM}" > /tmp/workspace/var/circle-build-num
       - run: make test
       - run: make rewrite
@@ -230,6 +228,7 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
+      <<: *release_and_prod_environment
     <<: *build_steps
 
   test-staging:
