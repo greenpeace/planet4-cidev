@@ -223,7 +223,6 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
-      <<: *release_environment
     <<: *build_steps
 
   test-staging:
