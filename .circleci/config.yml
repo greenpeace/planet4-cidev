@@ -234,6 +234,7 @@ jobs:
   test-staging:
     environment:
       <<: *common_environment
+      <<: *release_and_prod_environment
       <<: *release_environment
     <<: *test_steps
 
@@ -241,6 +242,7 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
+      <<: *release_and_prod_environment
       <<: *release_environment
     <<: *deploy_steps
 
@@ -258,6 +260,7 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
+      <<: *release_and_prod_environment
       <<: *release_environment
     <<: *rollback_steps
   promote:
@@ -286,13 +289,14 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
-      <<: *production_environment
+      <<: *release_and_prod_environment
     <<: *build_steps
 
   deploy-production:
     <<: *defaults
     environment:
       <<: *common_environment
+      <<: *release_and_prod_environment
       <<: *production_environment
     <<: *deploy_steps
 
@@ -300,6 +304,7 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
+      <<: *release_and_prod_environment
       <<: *production_environment
     working_directory: /tmp/workspace/src
     steps:
@@ -317,6 +322,7 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
+      <<: *release_and_prod_environment
       <<: *release_environment
     working_directory: /tmp/workspace/src
     steps:
@@ -351,6 +357,7 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
+      <<: *release_and_prod_environment
       <<: *production_environment
     working_directory: /tmp/workspace/src
     steps:
@@ -363,6 +370,7 @@ jobs:
       - image: greenpeaceinternational/planet4-backup:latest
     environment:
       <<: *common_environment
+      <<: *release_and_prod_environment
       <<: *production_environment
     working_directory: /app
     steps:
