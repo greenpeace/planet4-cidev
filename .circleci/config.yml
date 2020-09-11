@@ -451,13 +451,15 @@ workflows:
           type: approval
           requires:
             - test-staging
+      # Promote will approve hold-production if visualtests-compare passes.
       - promote:
           <<: *staging_common
           requires:
             - test-staging
             - visualtests-compare
-      - trigger-production:
-          <<: *staging_common
+      - deploy-production:
+          <<: *production_common
+          notify: true
           requires:
             - hold-production
   rollback-staging:
@@ -471,17 +473,6 @@ workflows:
           <<: *staging_common
           requires:
             - hold-rollback
-  production:
-    when:
-      equal: [ "production", << pipeline.parameters.release_stage >> ]
-    jobs:
-      - build-production:
-          <<: *production_common
-      - deploy-production:
-          <<: *production_common
-          notify: true
-          requires:
-            - build-production
 
   sync-from-production:
     triggers:
