@@ -106,7 +106,6 @@ job_definitions:
             - composer-v5
       - run: |
           if [[ -d source/cache ]]; then ls -al source/cache; fi
-      - run: activate-gcloud-account.sh
       - run: mkdir -p /tmp/workspace/var
       - run: mkdir -p /tmp/workspace/src
       - run: echo "${CIRCLE_BUILD_NUM}" > /tmp/workspace/var/circle-build-num
