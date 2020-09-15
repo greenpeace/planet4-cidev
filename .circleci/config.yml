@@ -276,24 +276,6 @@ jobs:
           name: Approve promotion
           command: promote-to-production.sh "${CIRCLE_WORKFLOW_ID}"
 
-  trigger-production:
-    <<: *defaults
-    environment:
-      <<: *common_environment
-    working_directory: /tmp/workspace/src
-    steps:
-      - checkout
-      - run:
-          name: Trigger production
-          command: trigger-production.sh "${CIRCLE_PROJECT_REPONAME}" "${CIRCLE_TAG}"
-
-  build-production:
-    <<: *defaults
-    environment:
-      <<: *common_environment
-      <<: *release_and_prod_environment
-    <<: *build_steps
-
   deploy-production:
     <<: *defaults
     environment:
@@ -458,7 +440,7 @@ workflows:
           <<: *staging_common
           type: approval
           requires:
-            - test-staging
+            - deploy-staging
       - deploy-production:
           <<: *production_common
           notify: true
