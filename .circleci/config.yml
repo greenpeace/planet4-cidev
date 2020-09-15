@@ -448,17 +448,17 @@ workflows:
           notify: true
           requires:
             - deploy-staging
-      - hold-production:
-          <<: *staging_common
-          type: approval
-          requires:
-            - test-staging
       # Promote will approve hold-production if visualtests-compare passes.
       - promote:
           <<: *staging_common
           requires:
             - test-staging
             - visualtests-compare
+      - hold-production:
+          <<: *staging_common
+          type: approval
+          requires:
+            - test-staging
       - deploy-production:
           <<: *production_common
           notify: true
