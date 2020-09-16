@@ -445,7 +445,6 @@ workflows:
           <<: *production_common
           notify: true
           requires:
-            - promote
             - hold-production
   rollback-staging:
     when:
