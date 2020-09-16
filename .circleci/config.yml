@@ -421,10 +421,10 @@ workflows:
           requires:
             - build-staging
             - visualtests-reference
-      - test-staging:
-          <<: *staging_common
-          requires:
-            - deploy-staging
+#      - test-staging:
+#          <<: *staging_common
+#          requires:
+#            - deploy-staging
       - visualtests-compare:
           <<: *staging_common
           notify: true
@@ -434,7 +434,7 @@ workflows:
       - promote:
           <<: *staging_common
           requires:
-            - test-staging
+#            - test-staging
             - visualtests-compare
       - hold-production:
           <<: *staging_common
