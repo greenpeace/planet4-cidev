@@ -3,8 +3,8 @@ version: 2.1
 parameters:
   release_stage:
     type: enum
-    default: "staging"
-    enum: ["staging", "production", "rollback"]
+    default: "release"
+    enum: ["release", "rollback"]
 
 defaults: &defaults
   docker:
@@ -107,10 +107,17 @@ job_definitions:
       - run: |
           if [[ -d source/cache ]]; then ls -al source/cache; fi
       - run: activate-gcloud-account.sh
-      - run: mkdir -p /tmp/workspace/var
-      - run: mkdir -p /tmp/workspace/src
+      - run: mkdir -p /tmp/workspace/var /tmp/workspace/src
       - run: echo "${CIRCLE_BUILD_NUM}" > /tmp/workspace/var/circle-build-num
-      - run: make
+      - run: make test
+      - run: make rewrite
+      - run: make checkout
+      - run: make rewrite-app-repos
+      - run: make copy
+      - run: make bake
+      - run: make persist
+      - run: make build
+      - run: make push
       - run:
           name: Notify failure
           when: on_fail
@@ -219,11 +226,11 @@ jobs:
       <<: *release_environment
     <<: *visualtests_compare_steps
 
-  build-staging:
+  build:
     <<: *defaults
     environment:
       <<: *common_environment
-      <<: *release_environment
+      <<: *release_build_env
     <<: *build_steps
 
   test-staging:
@@ -265,24 +272,6 @@ jobs:
       - run:
           name: Approve promotion
           command: promote-to-production.sh "${CIRCLE_WORKFLOW_ID}"
-
-  trigger-production:
-    <<: *defaults
-    environment:
-      <<: *common_environment
-    working_directory: /tmp/workspace/src
-    steps:
-      - checkout
-      - run:
-          name: Trigger production
-          command: trigger-production.sh "${CIRCLE_PROJECT_REPONAME}" "${CIRCLE_TAG}"
-
-  build-production:
-    <<: *defaults
-    environment:
-      <<: *common_environment
-      <<: *production_environment
-    <<: *build_steps
 
   deploy-production:
     <<: *defaults
@@ -367,19 +356,12 @@ jobs:
       - run: ./go.sh
 
 workflow_definitions:
-  develop_common: &develop_common
+  on_develop_commit: &on_develop_commit
     context: org-global
     filters:
       branches:
         only: develop
-  staging_common: &staging_common
-    context: org-global
-    filters:
-      branches:
-        ignore: /.*/
-      tags:
-        only: /^v.*/
-  production_common: &production_common
+  on_release_tag: &on_release_tag
     context: org-global
     filters:
       branches:
@@ -391,60 +373,60 @@ workflows:
   develop:
     jobs:
       - visualtests-reference-develop:
-          <<: *develop_common
+          <<: *on_develop_commit
       - build-develop:
-          <<: *develop_common
+          <<: *on_develop_commit
       - deploy-develop:
-          <<: *develop_common
+          <<: *on_develop_commit
           requires:
             - build-develop
             - visualtests-reference-develop
             - merge-develop
       - test-develop:
-          <<: *develop_common
+          <<: *on_develop_commit
           requires:
             - deploy-develop
       - visualtests-compare-develop:
-          <<: *develop_common
+          <<: *on_develop_commit
           requires:
             - deploy-develop
       - merge-develop:
-          <<: *develop_common
-  staging:
-    unless:
-      not:
-        equal: [ "staging", << pipeline.parameters.release_stage >> ]
+          <<: *on_develop_commit
+  release:
+    when:
+      equal: [ "release", << pipeline.parameters.release_stage >> ]
     jobs:
       - visualtests-reference:
-          <<: *staging_common
-      - build-staging:
-          <<: *staging_common
+          <<: *on_release_tag
+      - build:
+          <<: *on_release_tag
       - deploy-staging:
-          <<: *staging_common
+          <<: *on_release_tag
           requires:
-            - build-staging
+            - build
             - visualtests-reference
       - test-staging:
-          <<: *staging_common
+          <<: *on_release_tag
           requires:
             - deploy-staging
       - visualtests-compare:
-          <<: *staging_common
+          <<: *on_release_tag
           notify: true
           requires:
             - deploy-staging
       - hold-production:
-          <<: *staging_common
+          <<: *on_release_tag
           type: approval
           requires:
-            - test-staging
+            - deploy-staging
       - promote:
-          <<: *staging_common
+          <<: *on_release_tag
           requires:
             - test-staging
             - visualtests-compare
-      - trigger-production:
-          <<: *staging_common
+      - deploy-production:
+          <<: *on_release_tag
+          notify: true
           requires:
             - hold-production
   rollback-staging:
@@ -452,24 +434,10 @@ workflows:
       equal: [ "rollback", << pipeline.parameters.release_stage >> ]
     jobs:
       - hold-rollback:
-          <<: *staging_common
           type: approval
       - rollback-staging:
-          <<: *staging_common
           requires:
             - hold-rollback
-  production:
-    when:
-      equal: [ "production", << pipeline.parameters.release_stage >> ]
-    jobs:
-      - build-production:
-          <<: *production_common
-      - deploy-production:
-          <<: *production_common
-          notify: true
-          requires:
-            - build-production
-
   sync-from-production:
     triggers:
       - schedule:
