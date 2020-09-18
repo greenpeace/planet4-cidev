@@ -3,8 +3,8 @@ version: 2.1
 parameters:
   release_stage:
     type: enum
-    default: "staging"
-    enum: ["staging", "production", "rollback"]
+    default: "release"
+    enum: ["release", "rollback"]
 
 defaults: &defaults
   docker:
@@ -226,11 +226,11 @@ jobs:
       <<: *release_environment
     <<: *visualtests_compare_steps
 
-  build-staging:
+  build:
     <<: *defaults
     environment:
       <<: *common_environment
-      <<: *release_and_prod_environment
+      <<: *release_build_env
     <<: *build_steps
 
   test-staging:
@@ -364,19 +364,12 @@ jobs:
       - run: ./go.sh
 
 workflow_definitions:
-  develop_common: &develop_common
+  on_develop_commit: &on_develop_commit
     context: org-global
     filters:
       branches:
         only: develop
-  staging_common: &staging_common
-    context: org-global
-    filters:
-      branches:
-        ignore: /.*/
-      tags:
-        only: /^v.*/
-  production_common: &production_common
+  on_release_tag: &on_release_tag
     context: org-global
     filters:
       branches:
@@ -388,61 +381,64 @@ workflows:
   develop:
     jobs:
       - visualtests-reference-develop:
-          <<: *develop_common
+          <<: *on_develop_commit
       - build-develop:
-          <<: *develop_common
+          <<: *on_develop_commit
       - deploy-develop:
-          <<: *develop_common
+          <<: *on_develop_commit
           requires:
             - build-develop
             - visualtests-reference-develop
             - merge-develop
       - test-develop:
-          <<: *develop_common
+          <<: *on_develop_commit
           requires:
             - deploy-develop
       - visualtests-compare-develop:
-          <<: *develop_common
+          <<: *on_develop_commit
           requires:
             - deploy-develop
       - merge-develop:
-          <<: *develop_common
-  staging:
-    unless:
-      not:
-        equal: [ "staging", << pipeline.parameters.release_stage >> ]
+          <<: *on_develop_commit
+  release:
+    when:
+      equal: [ "release", << pipeline.parameters.release_stage >> ]
     jobs:
       - visualtests-reference:
-          <<: *staging_common
-      - build-staging:
-          <<: *staging_common
+          <<: *on_release_tag
+      - build:
+          <<: *on_release_tag
       - deploy-staging:
-          <<: *staging_common
+          <<: *on_release_tag
           requires:
-            - build-staging
+            - build
             - visualtests-reference
       - test-staging:
-          <<: *staging_common
+          <<: *on_release_tag
           requires:
             - deploy-staging
       - visualtests-compare:
-          <<: *staging_common
+          <<: *on_release_tag
           notify: true
           requires:
             - deploy-staging
       # Promote will approve hold-production if visualtests-compare passes.
       - hold-production:
-          <<: *staging_common
+          <<: *on_release_tag
           type: approval
           requires:
             - deploy-staging
       - promote:
-          <<: *staging_common
+          <<: *on_release_tag
           requires:
             - test-staging
             - visualtests-compare
       - deploy-production:
+<<<<<<< HEAD
           <<: *production_common
+=======
+          <<: *on_release_tag
+>>>>>>> develop
           notify: true
           requires:
             - hold-production
@@ -451,13 +447,14 @@ workflows:
       equal: [ "rollback", << pipeline.parameters.release_stage >> ]
     jobs:
       - hold-rollback:
-          <<: *staging_common
           type: approval
       - rollback-staging:
-          <<: *staging_common
           requires:
             - hold-rollback
+<<<<<<< HEAD
 
+=======
+>>>>>>> develop
   sync-from-production:
     triggers:
       - schedule:
