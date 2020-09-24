@@ -166,22 +166,20 @@ job_definitions:
           at: /tmp/workspace
       - run: activate-gcloud-account.sh
       - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make deploy
-      # If prod deploy succeeded, we can approve the staging rollback job. It will not roll back as there is a
-      # check in the job that only allows it to rollback if deploy wasn't confirmed in the same pipeline.
       - when:
           condition: << parameters.is_prod >>
           steps:
             - run:
-                name: Clear staging rollback job
+                name: Initiate finish-staging
                 command: |
                   url="https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job"
 
                   # Get workflow details
                   workflow=$(curl -s -u "${CIRCLE_TOKEN}": -X GET --header "Content-Type: application/json" "$url")
                   # Get approval job id
-                  job_id=$(echo "$workflow" | jq -r '.items[] | select(.name=="hold-rollback-staging") | .approval_request_id ')
+                  job_id=$(echo "$workflow" | jq -r '.items[] | select(.name=="hold-finish-staging") | .approval_request_id ')
 
-                  echo "Clearing staging rollback job after successful production deploy, as staging should now stay the new version."
+                  echo "Finishing staging."
                   echo "Job ID: ${job_id}"
                   curl \
                     --header "Content-Type: application/json" \
@@ -195,7 +193,7 @@ job_definitions:
             - slack/status:
                 channel: C015MQGG3KQ
                 webhook: ${SLACK_NRO_WEBHOOK}
-  rollback_steps: &rollback_steps
+  finish_staging_steps: &finish_staging_steps
     working_directory: ~/
     steps:
      - attach_workspace:
@@ -286,12 +284,12 @@ jobs:
       - checkout
       - run: merge-develop.sh
 
-  maybe-rollback-staging:
+  finish-staging:
     <<: *defaults
     environment:
       <<: *common_environment
       <<: *release_environment
-    <<: *rollback_steps
+    <<: *finish_staging_steps
   promote:
     <<: *defaults
     environment:
@@ -442,15 +440,15 @@ workflows:
           notify: true
           requires:
             - deploy-staging
-      - hold-rollback-staging:
+      - hold-finish-staging:
           <<: *on_release_tag
           type: approval
           requires:
             - deploy-staging
-      - maybe-rollback-staging:
+      - finish-staging:
           <<: *on_release_tag
           requires:
-            - hold-rollback-staging
+            - hold-finish-staging
       - hold-production:
           <<: *on_release_tag
           type: approval
