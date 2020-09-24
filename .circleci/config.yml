@@ -1,10 +1,5 @@
 ---
 version: 2.1
-parameters:
-  release_stage:
-    type: enum
-    default: "release"
-    enum: ["release", "rollback"]
 
 defaults: &defaults
   docker:
@@ -55,7 +50,7 @@ job_environments:
 job_definitions:
   visualtests_reference_steps: &visualtests_reference_steps
     docker:
-      - image: greenpeaceinternational/planet4-backstop:latest
+      - image: greenpeaceinternational/planet4-backstop:promote-after-successful-compare
     working_directory: /src
     steps:
       - run: ./checkout.sh
@@ -71,7 +66,7 @@ job_definitions:
 
   visualtests_compare_steps: &visualtests_compare_steps
     docker:
-      - image: greenpeaceinternational/planet4-backstop:latest
+      - image: greenpeaceinternational/planet4-backstop:promote-after-successful-compare
     working_directory: /src
     parameters:
       notify:
@@ -395,8 +390,6 @@ workflows:
       - merge-develop:
           <<: *on_develop_commit
   release:
-    when:
-      equal: [ "release", << pipeline.parameters.release_stage >> ]
     jobs:
       - visualtests-reference:
           <<: *on_release_tag
@@ -407,6 +400,14 @@ workflows:
           requires:
             - build
             - visualtests-reference
+      - hold-rollback-staging:
+          <<: *on_release_tag
+          type: approval
+          requires: deploy-staging
+      - rollback-staging:
+          <<: *on_release_tag
+          requires:
+            - hold-rollback
       - test-staging:
           <<: *on_release_tag
           requires:
@@ -421,25 +422,12 @@ workflows:
           type: approval
           requires:
             - deploy-staging
-      - promote:
-          <<: *on_release_tag
-          requires:
-            - test-staging
-            - visualtests-compare
       - deploy-production:
           <<: *on_release_tag
           notify: true
           requires:
+            - test-staging
             - hold-production
-  rollback-staging:
-    when:
-      equal: [ "rollback", << pipeline.parameters.release_stage >> ]
-    jobs:
-      - hold-rollback:
-          type: approval
-      - rollback-staging:
-          requires:
-            - hold-rollback
   sync-from-production:
     triggers:
       - schedule:
