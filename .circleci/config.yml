@@ -403,11 +403,12 @@ workflows:
       - hold-rollback-staging:
           <<: *on_release_tag
           type: approval
-          requires: deploy-staging
+          requires:
+            - deploy-staging
       - rollback-staging:
           <<: *on_release_tag
           requires:
-            - hold-rollback
+            - hold-rollback-staging
       - test-staging:
           <<: *on_release_tag
           requires:
