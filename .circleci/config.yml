@@ -50,7 +50,7 @@ job_environments:
 job_definitions:
   visualtests_reference_steps: &visualtests_reference_steps
     docker:
-      - image: greenpeaceinternational/planet4-backstop:promote-after-successful-compare
+      - image: greenpeaceinternational/planet4-backstop:latest
     working_directory: /src
     steps:
       - run: ./checkout.sh
@@ -66,7 +66,7 @@ job_definitions:
 
   visualtests_compare_steps: &visualtests_compare_steps
     docker:
-      - image: greenpeaceinternational/planet4-backstop:promote-after-successful-compare
+      - image: greenpeaceinternational/planet4-backstop:latest
     working_directory: /src
     parameters:
       notify:
