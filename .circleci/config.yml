@@ -170,14 +170,14 @@ job_definitions:
           condition: << parameters.is_prod >>
           steps:
             - run:
-                name: Initiate finish-staging (approve rollback but it won't really)
+                name: Initiate finish-staging
                 command: |
                   url="https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job"
 
                   # Get workflow details
                   workflow=$(curl -s -u "${CIRCLE_TOKEN}": -X GET --header "Content-Type: application/json" "$url")
                   # Get approval job id
-                  job_id=$(echo "$workflow" | jq -r '.items[] | select(.name=="rollback-staging") | .approval_request_id ')
+                  job_id=$(echo "$workflow" | jq -r '.items[] | select(.name=="hold-finish-staging") | .approval_request_id ')
 
                   echo "Finishing staging."
                   echo "Job ID: ${job_id}"
@@ -445,7 +445,7 @@ workflows:
           notify: true
           requires:
             - deploy-staging
-      - rollback-staging:
+      - hold-finish-staging:
           <<: *on_release_tag
           type: approval
           requires:
@@ -453,7 +453,7 @@ workflows:
       - finish-staging:
           <<: *on_release_tag
           requires:
-            - rollback-staging
+            - hold-finish-staging
       - hold-production:
           <<: *on_release_tag
           type: approval
