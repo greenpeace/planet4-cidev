@@ -400,15 +400,6 @@ workflows:
           requires:
             - build
             - visualtests-reference
-      - hold-rollback-staging:
-          <<: *on_release_tag
-          type: approval
-          requires:
-            - deploy-staging
-      - rollback-staging:
-          <<: *on_release_tag
-          requires:
-            - hold-rollback-staging
       - test-staging:
           <<: *on_release_tag
           requires:
@@ -418,6 +409,15 @@ workflows:
           notify: true
           requires:
             - deploy-staging
+      - hold-rollback-staging:
+          <<: *on_release_tag
+          type: approval
+          requires:
+            - deploy-staging
+      - rollback-staging:
+          <<: *on_release_tag
+          requires:
+            - hold-rollback-staging
       - hold-production:
           <<: *on_release_tag
           type: approval
