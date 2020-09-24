@@ -206,7 +206,7 @@ job_definitions:
          workflow=$(curl -s -u "${CIRCLE_TOKEN}": -X GET --header "Content-Type: application/json" "$url")
          hold_prod=$(echo "$workflow" | jq -r '.items[] | select(.name=="hold-production") | .status ')
          if [ $hold_prod == 'success' ]; then
-           echo "Not need to rollback, production deploy was initiated so staging will be at the same version."
+           echo "No need to rollback, production deploy was initiated so staging should stay at this version."
            exit 0;
          fi
          make rollback
