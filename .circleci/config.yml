@@ -166,6 +166,8 @@ job_definitions:
           at: /tmp/workspace
       - run: activate-gcloud-account.sh
       - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make deploy
+      # If prod deploy succeeded, we can approve the staging rollback job. It will not roll back as there is a
+      # check in the job that only allows it to rollback if deploy wasn't confirmed in the same pipeline.
       - when:
           condition: << parameters.is_prod >>
           steps:
