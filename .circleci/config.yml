@@ -199,15 +199,20 @@ job_definitions:
      - attach_workspace:
          at: /tmp/workspace
      - run: activate-gcloud-account.sh
-     - run: |
-         url="https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job"
-         workflow=$(curl -s -u "${CIRCLE_TOKEN}": -X GET --header "Content-Type: application/json" "$url")
-         hold_prod=$(echo "$workflow" | jq -r '.items[] | select(.name=="hold-production") | .status ')
-         if [ $hold_prod == 'success' ]; then
-           echo "No need to rollback, production deploy was initiated so staging should stay at this version."
-           exit 0;
-         fi
-         make rollback
+     - run:
+         name: Get hold-production status
+         command: |
+           url="https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job"
+           workflow=$(curl -s -u "${CIRCLE_TOKEN}": -X GET --header "Content-Type: application/json" "$url")
+           echo "$workflow" | jq -r '.items[] | select(.name=="hold-production") | .status ' >/tmp/workspace/prod_status
+     - run:
+         name: Rollback if production wasn't approved
+         command: |
+           if [ $(cat /tmp/workspace/prod_status) == 'success' ]; then
+             echo "No need to rollback, production deploy was initiated so staging should stay at this version."
+             exit 0;
+           fi
+           make rollback
 
 jobs:
   visualtests-reference-develop:
