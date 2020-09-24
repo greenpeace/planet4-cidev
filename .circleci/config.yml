@@ -179,9 +179,9 @@ job_definitions:
                   # Get workflow details
                   workflow=$(curl -s -u "${CIRCLE_TOKEN}": -X GET --header "Content-Type: application/json" "$url")
                   # Get approval job id
-                  job_id=$(echo "$workflow" | jq -r '.items[] | select(.name=="hold-rollback-stagin") | .approval_request_id ')
+                  job_id=$(echo "$workflow" | jq -r '.items[] | select(.name=="hold-rollback-staging") | .approval_request_id ')
 
-                  echo "Clearing staging rollback job after successful production deploy."
+                  echo "Clearing staging rollback job after successful production deploy, as staging should now stay the new version."
                   echo "Job ID: ${job_id}"
                   curl \
                     --header "Content-Type: application/json" \
@@ -286,7 +286,7 @@ jobs:
       - checkout
       - run: merge-develop.sh
 
-  rollback-staging:
+  maybe-rollback-staging:
     <<: *defaults
     environment:
       <<: *common_environment
@@ -447,7 +447,7 @@ workflows:
           type: approval
           requires:
             - deploy-staging
-      - rollback-staging:
+      - maybe-rollback-staging:
           <<: *on_release_tag
           requires:
             - hold-rollback-staging
