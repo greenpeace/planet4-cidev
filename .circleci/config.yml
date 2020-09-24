@@ -166,24 +166,26 @@ job_definitions:
           at: /tmp/workspace
       - run: activate-gcloud-account.sh
       - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make deploy
-      - run:
-          name: Clear staging rollback job
-          when: << parameters.is_prod >>
-          command: |
-            url="https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job"
+      - when:
+          condition: << parameters.is_prod >>
+          steps:
+            - run:
+                name: Clear staging rollback job
+                command: |
+                  url="https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job"
 
-            # Get workflow details
-            workflow=$(curl -s -u "${CIRCLE_TOKEN}": -X GET --header "Content-Type: application/json" "$url")
-            # Get approval job id
-            job_id=$(echo "$workflow" | jq -r '.items[] | select(.name=="hold-rollback-stagin") | .approval_request_id ')
+                  # Get workflow details
+                  workflow=$(curl -s -u "${CIRCLE_TOKEN}": -X GET --header "Content-Type: application/json" "$url")
+                  # Get approval job id
+                  job_id=$(echo "$workflow" | jq -r '.items[] | select(.name=="hold-rollback-stagin") | .approval_request_id ')
 
-            echo "Clearing staging rollback job after successful production deploy."
-            echo "Job ID: ${job_id}"
-            curl \
-              --header "Content-Type: application/json" \
-              -u "${CIRCLE_TOKEN}:" \
-              -X POST \
-              "https://circleci.com/api/v2/workflow/${ID}/approve/${job_id}"
+                  echo "Clearing staging rollback job after successful production deploy."
+                  echo "Job ID: ${job_id}"
+                  curl \
+                    --header "Content-Type: application/json" \
+                    -u "${CIRCLE_TOKEN}:" \
+                    -X POST \
+                    "https://circleci.com/api/v2/workflow/${ID}/approve/${job_id}"
       - when:
           condition: << parameters.notify >>
           steps:
@@ -455,6 +457,7 @@ workflows:
       - deploy-production:
           <<: *on_release_tag
           notify: true
+          is_prod: true
           requires:
             - test-staging
             - hold-production
