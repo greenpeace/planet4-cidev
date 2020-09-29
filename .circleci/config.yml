@@ -1,5 +1,9 @@
 ---
 version: 2.1
+parameters:
+  rollback:
+    type: boolean
+    default: false
 
 defaults: &defaults
   docker:
@@ -213,6 +217,13 @@ job_definitions:
              exit 0;
            fi
            make rollback
+  rollback_steps: &rollback_steps
+    working_directory: ~/
+    steps:
+    - attach_workspace:
+      at: /tmp/workspace
+    - run: activate-gcloud-account.sh
+    - run: make rollback
 
 jobs:
   visualtests-reference-develop:
@@ -305,6 +316,13 @@ jobs:
       - run:
           name: Approve promotion
           command: promote-to-production.sh "${CIRCLE_WORKFLOW_ID}"
+
+  rollback-production:
+      <<: *defaults
+      environment:
+        <<: *common_environment
+        <<: *production_environment
+      <<: *rollback_steps
 
   deploy-production:
     <<: *defaults
@@ -466,6 +484,19 @@ workflows:
           requires:
             - test-staging
             - hold-production
+
+  rollback-production:
+      when:
+        equal: << pipeline.parameters.rollback >>
+      jobs:
+        - hold-rollback:
+            <<: *on_release_tag
+            type: approval
+        - rollback-production:
+            <<: *on_release_tag
+            requires:
+              - hold-rollback
+
   sync-from-production:
     triggers:
       - schedule:
