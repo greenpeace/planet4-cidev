@@ -1,5 +1,9 @@
 ---
 version: 2.1
+parameters:
+  rollback:
+    type: boolean
+    default: false
 
 defaults: &defaults
   docker:
@@ -301,6 +305,13 @@ jobs:
           name: Approve promotion
           command: promote-to-production.sh "${CIRCLE_WORKFLOW_ID}"
 
+  rollback-production:
+    <<: *defaults
+    environment:
+      <<: *common_environment
+      <<: *production_environment
+    <<: *rollback_steps
+
   deploy-production:
     <<: *defaults
     environment:
@@ -461,6 +472,18 @@ workflows:
           requires:
             - test-staging
             - hold-production
+
+  rollback-production:
+    when: << pipeline.parameters.rollback >>
+    jobs:
+      - hold-rollback:
+          <<: *on_release_tag
+          type: approval
+      - rollback-production:
+          <<: *on_release_tag
+          requires:
+            - hold-rollback
+
   sync-from-production:
     triggers:
       - schedule:
