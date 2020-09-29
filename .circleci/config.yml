@@ -487,8 +487,7 @@ workflows:
             - hold-production
 
   rollback-production:
-    when:
-      equal: << pipeline.parameters.rollback >>
+    when: << pipeline.parameters.rollback >>
     jobs:
       - hold-rollback:
           <<: *on_release_tag
