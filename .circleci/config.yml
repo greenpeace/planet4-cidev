@@ -445,6 +445,7 @@ workflows:
       - merge-develop:
           <<: *on_develop_commit
   release:
+    unless: << pipeline.parameters.rollback >>
     jobs:
       - visualtests-reference:
           <<: *on_release_tag
