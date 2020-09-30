@@ -4,6 +4,9 @@ parameters:
   rollback:
     type: boolean
     default: false
+  release:
+    type: boolean
+    default: true
 
 defaults: &defaults
   docker:
@@ -445,7 +448,7 @@ workflows:
       - merge-develop:
           <<: *on_develop_commit
   release:
-    unless: << pipeline.parameters.rollback >>
+    when: << pipeline.parameters.release >>
     jobs:
       - visualtests-reference:
           <<: *on_release_tag
