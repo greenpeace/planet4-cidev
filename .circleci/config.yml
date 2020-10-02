@@ -5,6 +5,9 @@ parameters:
   rollback:
     type: boolean
     default: false
+  rollback-explicit:
+    type: boolean
+    default: false
 
 defaults: &defaults
   docker:
@@ -514,6 +517,7 @@ workflows:
           type: approval
       - rollback-staging:
           <<: *on_release_tag
+          explicit: << pipeline.parameters.rollback-explicit >>
           requires:
             - hold
       - hold:
@@ -521,6 +525,7 @@ workflows:
           type: approval
       - rollback-production:
           <<: *on_release_tag
+          explicit: << pipeline.parameters.rollback-explicit >>
           requires:
             - hold
 
