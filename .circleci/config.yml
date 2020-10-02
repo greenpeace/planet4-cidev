@@ -228,10 +228,9 @@ job_definitions:
         default: false
         type: boolean
     steps:
-      - attach_workspace:
-          at: /tmp/workspace
       - run: activate-gcloud-account.sh
-      - checkout
+      - run: mkdir -p /tmp/workspace/var /tmp/workspace/src
+      - run: make checkout
       # check if explicit tag was specified
       - when:
           condition: << parameters.explicit >>
