@@ -517,7 +517,7 @@ workflows:
           type: approval
       - rollback-staging:
           <<: *on_release_tag
-          explicit: << pipeline.parameters.explicit >>
+          explicit: << pipeline.parameters.rollback-explicit >>
           requires:
             - hold
       - hold:
@@ -525,7 +525,7 @@ workflows:
           type: approval
       - rollback-production:
           <<: *on_release_tag
-          explicit: << pipeline.parameters.explicit >>
+          explicit: << pipeline.parameters.rollback-explicit >>
           requires:
             - hold
 
