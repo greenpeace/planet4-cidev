@@ -341,7 +341,7 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
-      <<: *staging_environment
+      <<: *release_environment
     <<: *rollback_steps
 
   rollback-production:
