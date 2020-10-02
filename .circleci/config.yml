@@ -512,22 +512,22 @@ workflows:
   rollback:
     when: << pipeline.parameters.rollback >>
     jobs:
-      - hold:
+      - hold-staging:
           <<: *on_release_tag
           type: approval
       - rollback-staging:
           <<: *on_release_tag
           explicit: << pipeline.parameters.rollback-explicit >>
           requires:
-            - hold
-      - hold:
+            - hold-staging
+      - hold-production:
           <<: *on_release_tag
           type: approval
       - rollback-production:
           <<: *on_release_tag
           explicit: << pipeline.parameters.rollback-explicit >>
           requires:
-            - hold
+            - hold-production
 
   sync-from-production:
     triggers:
