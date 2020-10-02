@@ -231,6 +231,7 @@ job_definitions:
       - attach_workspace:
           at: /tmp/workspace
       - run: activate-gcloud-account.sh
+      - checkout
       # check if explicit tag was specified
       - when:
           condition: << parameters.explicit >>
@@ -523,6 +524,8 @@ workflows:
       - hold-production:
           <<: *on_release_tag
           type: approval
+          requires:
+            - rollback-staging
       - rollback-production:
           <<: *on_release_tag
           explicit: << pipeline.parameters.rollback-explicit >>
