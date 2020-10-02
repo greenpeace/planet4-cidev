@@ -201,16 +201,16 @@ job_definitions:
   finish_staging_steps: &finish_staging_steps
     working_directory: ~/
     steps:
-     - attach_workspace:
+      - attach_workspace:
           at: /tmp/workspace
-     - run: activate-gcloud-account.sh
-     - run:
+      - run: activate-gcloud-account.sh
+      - run:
           name: Get hold-production status
           command: |
             url="https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job"
             workflow=$(curl -s -u "${CIRCLE_TOKEN}": -X GET --header "Content-Type: application/json" "$url")
             echo "$workflow" | jq -r '.items[] | select(.name=="hold-production") | .status ' >/tmp/workspace/prod_status
-     - run:
+      - run:
           name: Rollback if production wasn't approved
           command: |
             if [ $(cat /tmp/workspace/prod_status) == 'success' ]; then
@@ -220,11 +220,23 @@ job_definitions:
             make rollback
   rollback_steps: &rollback_steps
     working_directory: ~/
+    parameters:
+      explicit:
+        default: false
+        type: boolean
     steps:
       - attach_workspace:
           at: /tmp/workspace
       - run: activate-gcloud-account.sh
-      - run: make rollback
+      # check if explicit tag was specified
+      - when:
+          condition: << parameters.explicit >>
+          steps:
+            - run: BUILD_TAG="${CIRCLE_TAG}" make deploy
+      - unless:
+          condition: << parameters.explicit >>
+          steps:
+            - run: make rollback
 
 jobs:
   visualtests-reference-develop:
@@ -324,6 +336,13 @@ jobs:
       <<: *common_environment
       <<: *production_environment
     <<: *deploy_steps
+
+  rollback-staging:
+    <<: *defaults
+    environment:
+      <<: *common_environment
+      <<: *staging_environment
+    <<: *rollback_steps
 
   rollback-production:
     <<: *defaults
@@ -486,16 +505,24 @@ workflows:
           requires:
             - test-staging
             - hold-production
-  rollback-production:
+
+  rollback:
     when: << pipeline.parameters.rollback >>
     jobs:
-      - hold-rollback:
+      - hold:
+          <<: *on_release_tag
+          type: approval
+      - rollback-staging:
+          <<: *on_release_tag
+          requires:
+            - hold
+      - hold:
           <<: *on_release_tag
           type: approval
       - rollback-production:
           <<: *on_release_tag
           requires:
-            - hold-rollback
+            - hold
 
   sync-from-production:
     triggers:
