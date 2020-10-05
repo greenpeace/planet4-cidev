@@ -498,13 +498,8 @@ workflows:
   rollback:
     when: << pipeline.parameters.rollback >>
     jobs:
-      - hold-staging:
-          <<: *on_release_tag
-          type: approval
       - rollback-staging:
           <<: *on_release_tag
-          requires:
-            - hold-staging
       - hold-production:
           <<: *on_release_tag
           type: approval
