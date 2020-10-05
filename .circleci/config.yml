@@ -5,9 +5,6 @@ parameters:
   rollback:
     type: boolean
     default: false
-  rollback-explicit:
-    type: boolean
-    default: false
 
 defaults: &defaults
   docker:
@@ -223,23 +220,12 @@ job_definitions:
             make rollback
   rollback_steps: &rollback_steps
     working_directory: ~/
-    parameters:
-      explicit:
-        default: false
-        type: boolean
     steps:
       - run: activate-gcloud-account.sh
       - run: mkdir -p /tmp/workspace/var /tmp/workspace/src
       - run: make checkout
-      # check if explicit tag was specified
-      - when:
-          condition: << parameters.explicit >>
-          steps:
-            - run: BUILD_TAG="${CIRCLE_TAG}" make deploy
-      - unless:
-          condition: << parameters.explicit >>
-          steps:
-            - run: make rollback
+      - run: make copy
+      - run: BUILD_TAG="${CIRCLE_TAG}" make deploy
 
 jobs:
   visualtests-reference-develop:
@@ -517,7 +503,6 @@ workflows:
           type: approval
       - rollback-staging:
           <<: *on_release_tag
-          explicit: << pipeline.parameters.rollback-explicit >>
           requires:
             - hold-staging
       - hold-production:
@@ -527,7 +512,6 @@ workflows:
             - rollback-staging
       - rollback-production:
           <<: *on_release_tag
-          explicit: << pipeline.parameters.rollback-explicit >>
           requires:
             - hold-production
 
