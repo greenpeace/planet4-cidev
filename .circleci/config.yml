@@ -309,6 +309,13 @@ jobs:
       <<: *common_environment
       <<: *release_environment
     <<: *finish_staging_steps
+  
+  rollback-staging:
+    <<: *defaults
+    environment:
+      <<: *common_environment
+      <<: *release_environment
+    <<: *rollback_steps
   promote:
     <<: *defaults
     environment:
@@ -326,13 +333,6 @@ jobs:
       <<: *common_environment
       <<: *production_environment
     <<: *deploy_steps
-
-  rollback-staging:
-    <<: *defaults
-    environment:
-      <<: *common_environment
-      <<: *release_environment
-    <<: *rollback_steps
 
   rollback-production:
     <<: *defaults
@@ -495,8 +495,7 @@ workflows:
           requires:
             - test-staging
             - hold-production
-
-  rollback:
+  rollback-production:
     when: << pipeline.parameters.rollback >>
     jobs:
       - hold-staging:
