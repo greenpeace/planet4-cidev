@@ -225,6 +225,7 @@ job_definitions:
       - run: mkdir -p /tmp/workspace/var /tmp/workspace/src
       - run: make checkout
       - run: make copy
+      - run: make persist
       - run: BUILD_TAG="${CIRCLE_TAG}" make deploy
 
 jobs:
