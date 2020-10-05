@@ -495,7 +495,7 @@ workflows:
           requires:
             - test-staging
             - hold-production
-  rollback-production:
+  rollback:
     when: << pipeline.parameters.rollback >>
     jobs:
       - hold-staging:
