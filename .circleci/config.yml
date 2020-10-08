@@ -6,6 +6,8 @@ parameters:
     type: boolean
     default: false
 
+defaults: &defaults
+
 orbs:
   slack: circleci/slack@3.4.2
   docker: circleci/docker@1.4.0
@@ -316,7 +318,7 @@ jobs:
       <<: *common_environment
       <<: *release_environment
     <<: *finish_staging_steps
-
+  
   rollback-staging:
     <<: *defaults
     environment:
