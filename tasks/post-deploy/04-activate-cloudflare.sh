@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -eo pipefail
 
 # Automatically update the DB if needed
 wp plugin activate cloudflare
