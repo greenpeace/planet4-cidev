@@ -37,6 +37,7 @@ job_environments:
     PARENT_VERSION: add-cf-key-to-wp-config
   release_build_env: &release_build_env
     GOOGLE_PROJECT_ID: planet4-production
+    PARENT_VERSION: add-cf-key-to-wp-config
   release_environment: &release_environment
     APP_ENVIRONMENT: staging
     APP_HOSTNAME: www-stage.greenpeace.org
