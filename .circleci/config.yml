@@ -183,7 +183,11 @@ job_definitions:
       - attach_workspace:
           at: /tmp/workspace
       - run: activate-gcloud-account.sh
-      - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make deploy
+      - run: make prepare-helm
+      - run: ./helm_check_current_release.sh
+      - run: ./backup_db.sh
+      - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make deploy-helm
+      - run: make post-deploy
       - when:
           condition: << parameters.is_prod >>
           steps:
