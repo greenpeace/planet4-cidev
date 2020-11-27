@@ -48,6 +48,7 @@ job_environments:
     NEWRELIC_APPNAME: P4 cidev Release
     WP_DB_NAME: planet4-cidev_wordpress_release
     WP_STATELESS_BUCKET: planet4-cidev-stateless-release
+    PARENT_VERSION: add-cf-key-to-wp-config
   production_environment: &production_environment
     APP_HOSTNAME: www.greenpeace.org
     CLOUDSQL_INSTANCE: planet4-prod
@@ -58,6 +59,7 @@ job_environments:
     NEWRELIC_APPNAME: P4 cidev Production
     WP_DB_NAME: planet4-cidev_wordpress_master
     WP_STATELESS_BUCKET: planet4-cidev-stateless
+    PARENT_VERSION: add-cf-key-to-wp-config
 
 job_definitions:
   visualtests_reference_steps: &visualtests_reference_steps
