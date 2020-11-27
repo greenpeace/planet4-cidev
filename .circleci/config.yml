@@ -187,7 +187,6 @@ job_definitions:
           at: /tmp/workspace
       - run: activate-gcloud-account.sh
       - run: make prepare-helm
-      - run: ./helm_check_current_release.sh
       - run: make backup
       - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make deploy-helm
       - run: make post-deploy
