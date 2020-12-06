@@ -510,7 +510,6 @@ workflows:
           notify: true
           is_prod: true
           requires:
-            - test-staging
             - hold-production
   rollback:
     when: << pipeline.parameters.rollback >>
