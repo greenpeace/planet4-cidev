@@ -67,7 +67,7 @@ commands:
         type: string
     steps:
       - run:
-          name: Unhold job.
+          name: Unhold job "<< parameters.job_name >>"
           command: |
             if [ -f /tmp/workspace/approve_workflow ]; then
               WORKFLOW_ID=$(cat /tmp/workspace/approve_workflow)
@@ -224,18 +224,6 @@ job_definitions:
       - run: make backup
       - run: BUILD_TAG=build-$(cat /tmp/workspace/var/circle-build-num) make deploy-helm
       - run: make post-deploy
-      - run:
-          name: Extract workflow from commit message
-          command: |
-            UNHOLD_WORKFLOW_LINE=$(git --git-dir=/home/circleci/checkout/.git log --format=%B -n 1 "$CIRCLE_SHA1" | { grep '^\/unhold ' || true; } )
-            echo "line $UNHOLD_WORKFLOW_LINE"
-            if [[ -n $UNHOLD_WORKFLOW_LINE ]]; then
-              WORKFLOW_ID=${UNHOLD_WORKFLOW_LINE#"/unhold "}
-              echo "$WORKFLOW_ID"
-              echo $WORKFLOW_ID > /tmp/workspace/approve_workflow
-            fi
-      - approve_job:
-          job_name: instance-ready
       - run:
           name: Extract workflow from commit message
           command: |
