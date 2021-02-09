@@ -23,6 +23,7 @@ job_environments:
     APP_HOSTPATH: cidev
     CONTAINER_PREFIX: planet4-cidev
     WP_DB_NAME_PREFIX: planet4-cidev_wordpress
+    WP_VERSION: 5.6.1
   develop_environment: &develop_environment
     APP_ENVIRONMENT: development
     APP_HOSTNAME: www-dev.greenpeace.org
