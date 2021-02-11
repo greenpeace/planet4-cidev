@@ -184,7 +184,7 @@ job_definitions:
   test_steps: &test_steps
     working_directory: ~/project
     docker:
-      - image: greenpeaceinternational/p4-unit-tests:codeception2.5.2-codeception
+      - image: greenpeaceinternational/p4-codeception:simpify
         auth:
           <<: *docker_auth
       - name: selenium
