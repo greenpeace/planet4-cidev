@@ -191,6 +191,10 @@ job_definitions:
         image: selenium/standalone-chrome-debug:3.141.59-oxygen
         auth:
           <<: *docker_auth
+      - name: mysql
+        image: circleci/mysql:5.7
+	auth:
+          <<: *docker_auth
     steps:
       - checkout
       - run: dockerize -wait tcp://selenium:4444
