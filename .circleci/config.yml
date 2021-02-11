@@ -193,7 +193,7 @@ job_definitions:
           <<: *docker_auth
       - name: mysql
         image: circleci/mysql:5.7
-	auth:
+        auth:
           <<: *docker_auth
     steps:
       - checkout
