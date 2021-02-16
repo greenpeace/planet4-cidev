@@ -3,8 +3,9 @@
 	"description": "Greenpeace P4 cidev",
 	"license": "MIT",
 	"require": {
-		"greenpeace/planet4-master-theme" : "dev-master",
-		"greenpeace/planet4-plugin-gutenberg-blocks" : "dev-master"
+		"greenpeace/planet4-master-theme": "dev-master",
+		"greenpeace/planet4-plugin-gutenberg-blocks": "dev-master",
+		"mfse/wordpress-apm-agent-elasticsearch": "v1.*"
 	},
 	"scripts": {
 		"site:custom" : []
