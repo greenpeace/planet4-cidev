@@ -350,16 +350,6 @@ jobs:
       <<: *release_environment
     <<: *deploy_steps
 
-  merge-develop:
-    <<: *defaults
-    environment:
-      <<: *common_environment
-      <<: *develop_environment
-    working_directory: /tmp/workspace/src
-    steps:
-      - checkout
-      - run: merge-develop.sh
-
   finish-staging:
     <<: *defaults
     environment:
@@ -510,8 +500,6 @@ workflows:
           <<: *on_develop_commit
           requires:
             - deploy-develop
-      - merge-develop:
-          <<: *on_develop_commit
   production:
     unless: << pipeline.parameters.rollback >>
     jobs:
