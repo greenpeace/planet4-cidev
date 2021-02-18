@@ -480,7 +480,7 @@ workflow_definitions:
     context: org-global
     filters:
       branches:
-        only: develop
+        only: main
   on_release_tag: &on_release_tag
     context: org-global
     filters:
@@ -512,7 +512,7 @@ workflows:
             - deploy-develop
       - merge-develop:
           <<: *on_develop_commit
-  release:
+  production:
     unless: << pipeline.parameters.rollback >>
     jobs:
       - visualtests-reference:
