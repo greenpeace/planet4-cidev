@@ -2,16 +2,9 @@
 	"name": "greenpeace/planet4-cidev",
 	"description": "Greenpeace P4 cidev",
 	"license": "MIT",
-	"repositories": [
-		{
-		  "type": "vcs",
-		  "url": "https://github.com/matheusevangelista/Wordpress-APM-Agent-Elasticsearch.git"
-		}
-	],
 	"require": {
 		"greenpeace/planet4-master-theme": "dev-master",
-		"greenpeace/planet4-plugin-gutenberg-blocks": "dev-master",
-		"mfse/wordpress-apm-agent-elasticsearch": "v1.*"
+		"greenpeace/planet4-plugin-gutenberg-blocks": "dev-master"
 	},
 	"scripts": {
 		"site:custom" : []
