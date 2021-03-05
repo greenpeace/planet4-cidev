@@ -4,6 +4,6 @@ $I->amGoingTo('Check navbar has right design');
 
 $I->amOnPage('/');
 
-$headerBackgroundColor = $I->getCSSValue('nav#header', 'background');
+$headerBackground = $I->getCSSValue('nav#header', 'background');
 
-$I->assertEquals('var(--campaign_nav_color,rgba(7,67,101,.8))', $headerBackgroundColor);
+$I->assertEquals('rgba(7, 67, 101, 0.8) none repeat scroll 0% 0% / auto padding-box border-box', $headerBackground);
