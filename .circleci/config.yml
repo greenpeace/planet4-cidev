@@ -179,7 +179,7 @@ job_definitions:
   test_steps: &test_steps
     working_directory: ~/project
     docker:
-      - image: greenpeaceinternational/p4-codeception:planet-5955
+      - image: greenpeaceinternational/p4-codeception:latest
         auth:
           <<: *docker_auth
       - name: selenium
@@ -188,6 +188,7 @@ job_definitions:
           <<: *docker_auth
     steps:
       - checkout
+      - run: if [ ! -d "tests" ] || [ ! "$(ls -A tests)" ]; then circleci-agent step halt; fi
       - run: dockerize -wait tcp://selenium:4444
       - run: codeceptionify.sh .
       - run: codecept run --xml=junit.xml --html
