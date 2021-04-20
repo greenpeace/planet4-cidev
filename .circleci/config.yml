@@ -12,7 +12,7 @@ docker_auth: &docker_auth
 
 defaults: &defaults
   docker:
-    - image: greenpeaceinternational/p4-builder:fix-composer-build
+    - image: greenpeaceinternational/p4-builder:test-apm
       auth:
         <<: *docker_auth
 
