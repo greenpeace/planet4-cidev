@@ -179,7 +179,7 @@ job_definitions:
   test_steps: &test_steps
     working_directory: ~/project
     docker:
-      - image: greenpeaceinternational/p4-codeception:latest
+      - image: greenpeaceinternational/p4-codeception:expand
         auth:
           <<: *docker_auth
       - name: selenium
