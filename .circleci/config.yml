@@ -12,7 +12,7 @@ docker_auth: &docker_auth
 
 defaults: &defaults
   docker:
-    - image: greenpeaceinternational/p4-builder:expand
+    - image: greenpeaceinternational/p4-builder:latest
       auth:
         <<: *docker_auth
 
@@ -205,16 +205,6 @@ job_definitions:
       - store_artifacts:
           path: /tmp/artifacts
 
-  test_user_steps: &test_user_steps
-    working_directory: ~/
-    steps:
-      - run:
-          name: Activate gcloud
-          command: activate-gcloud-account.sh
-      - run:
-          name: Remove test account
-          command: make post-test
-
   deploy_steps: &deploy_steps
     working_directory: ~/
     parameters:
@@ -315,12 +305,6 @@ jobs:
       <<: *develop_environment
     <<: *test_steps
 
-  test-user-develop:
-    environment:
-      <<: *common_environment
-      <<: *develop_environment
-    <<: *test_user_steps
-
   deploy-develop:
     <<: *defaults
     environment:
@@ -366,7 +350,7 @@ jobs:
       <<: *common_environment
       <<: *release_environment
     <<: *finish_staging_steps
-
+  
   rollback-staging:
     <<: *defaults
     environment:
@@ -505,14 +489,6 @@ workflows:
           <<: *on_develop_commit
           requires:
             - deploy-develop
-      - hold-test-user:
-          <<: *on_develop_commit
-          requires:
-            - deploy-develop
-      - test-user-develop:
-          <<: *on_develop_commit
-          requires:
-            - hold-test-user
       - visualtests-compare-develop:
           <<: *on_develop_commit
           requires:
