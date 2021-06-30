@@ -12,7 +12,7 @@ docker_auth: &docker_auth
 
 defaults: &defaults
   docker:
-    - image: greenpeaceinternational/p4-builder:expand
+    - image: greenpeaceinternational/p4-builder:planet-6044
       auth:
         <<: *docker_auth
 
@@ -181,7 +181,7 @@ job_definitions:
   test_steps: &test_steps
     working_directory: ~/project
     docker:
-      - image: greenpeaceinternational/p4-codeception:expand
+      - image: greenpeaceinternational/p4-codeception:planet-6044
         auth:
           <<: *docker_auth
       - name: selenium
