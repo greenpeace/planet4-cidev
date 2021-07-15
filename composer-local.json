@@ -1,10 +1,13 @@
 {
-	"name": "greenpeace/planet4-cidev",
-	"description": "Greenpeace P4 cidev",
-	"license": "MIT",
-	"require": {
-	},
-	"scripts": {
-		"site:custom" : []
-	}
+    "name": "greenpeace/planet4-cidev",
+    "description": "Greenpeace P4 cidev",
+    "license": "MIT",
+    "require": {
+    },
+    "scripts": {
+        "site:custom" : []
+    },
+    "extra": {
+        "wp-version": "5.8-RC2"
+    }
 }
