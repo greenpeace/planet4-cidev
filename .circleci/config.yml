@@ -34,7 +34,6 @@ job_environments:
     NEWRELIC_APPNAME: P4 cidev Development
     WP_DB_NAME: planet4-cidev_wordpress_develop
     WP_STATELESS_BUCKET: planet4-cidev-stateless-develop
-    WP_VERSION: 5.8.1
   release_build_env: &release_build_env
     GOOGLE_PROJECT_ID: planet4-production
   release_environment: &release_environment
