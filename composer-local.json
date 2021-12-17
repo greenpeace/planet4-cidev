@@ -2,16 +2,7 @@
     "name": "greenpeace/planet4-cidev",
     "description": "Greenpeace P4 cidev",
     "license": "MIT",
-    "require": {
-        "wpackagist-plugin/google-apps-login": "3.4.4",
-        "wpackagist-plugin/cloudflare" : "4.5.1",
-        "wpackagist-plugin/redirection": "5.*",
-        "wpackagist-plugin/timber-library": "1.19.*",
-        "wpackagist-plugin/duplicate-post": "4.*"
-    },
-    "extra": {
-        "wp-version": "5.8.1"
-    },
+    "require": {},
     "scripts": {
         "site:custom" : []
     }
