@@ -12,7 +12,7 @@ docker_auth: &docker_auth
 
 defaults: &defaults
   docker:
-    - image: greenpeaceinternational/p4-builder:composer-upgrade
+    - image: greenpeaceinternational/p4-builder:sitemap
       auth:
         <<: *docker_auth
 
