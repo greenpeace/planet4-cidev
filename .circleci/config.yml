@@ -12,7 +12,7 @@ docker_auth: &docker_auth
 
 defaults: &defaults
   docker:
-    - image: greenpeaceinternational/p4-builder:planet-6772-data-sync-flag
+    - image: greenpeaceinternational/p4-builder:latest
       auth:
         <<: *docker_auth
 
@@ -433,12 +433,19 @@ jobs:
     <<: *defaults
     environment:
       <<: *common_environment
-      <<: *production_environment
+      <<: *develop_environment
     working_directory: /tmp/workspace/src
     steps:
       - checkout
-      - run: activate-gcloud-account.sh
-      - run: notify-sync-admins.sh
+      - run:
+          name: Configure
+          command: activate-gcloud-account.sh
+      - run:
+          name: Check sync flag
+          command: check-data-sync-flag.sh
+      - run:
+          name: Notify admins
+          command: notify-sync-admins.sh
 
   backup:
     docker:
@@ -547,24 +554,22 @@ workflows:
             - hold-production
 
   sync-from-production:
+    triggers:
+      - schedule:
+          cron: "10 01 1 * *"
+          filters:
+            branches:
+              only:
+                - main
     jobs:
       - create-sync-sql:
           context: org-global
-          filters:
-            branches:
-              only: main
       - sync-to-staging:
           context: org-global
-          filters:
-            branches:
-              only: main
           requires:
             - create-sync-sql
       - sync-to-develop:
           context: org-global
-          filters:
-            branches:
-              only: main
           requires:
             - create-sync-sql
 
