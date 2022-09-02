@@ -15,9 +15,46 @@ defaults: &defaults
     - image: greenpeaceinternational/p4-builder:latest
       auth:
         <<: *docker_auth
+  resource_class: xlarge
 
 orbs:
   slack: circleci/slack@3.4.2
+job_environments:
+  common_environment: &common_environment
+    APP_HOSTPATH: cidev
+    CONTAINER_PREFIX: planet4-cidev
+    WP_DB_NAME_PREFIX: planet4-cidev_wordpress
+  develop_environment: &develop_environment
+    APP_ENVIRONMENT: development
+    APP_HOSTNAME: www-dev.greenpeace.org
+    CLOUDSQL_INSTANCE: p4-develop-k8s
+    GOOGLE_PROJECT_ID: planet-4-151612
+    GCLOUD_CLUSTER: p4-development
+    HELM_NAMESPACE: develop
+    HELM_RELEASE: planet4-cidev
+    WP_DB_NAME: planet4-cidev_wordpress_develop
+    WP_STATELESS_BUCKET: planet4-cidev-stateless-develop
+  release_build_env: &release_build_env
+    GOOGLE_PROJECT_ID: planet4-production
+  release_environment: &release_environment
+    APP_ENVIRONMENT: staging
+    APP_HOSTNAME: www-stage.greenpeace.org
+    CLOUDSQL_INSTANCE: planet4-prod
+    GCLOUD_CLUSTER: planet4-production
+    GOOGLE_PROJECT_ID: planet4-production
+    HELM_NAMESPACE: cidev
+    HELM_RELEASE: planet4-cidev-release
+    WP_DB_NAME: planet4-cidev_wordpress_release
+    WP_STATELESS_BUCKET: planet4-cidev-stateless-release
+  production_environment: &production_environment
+    APP_HOSTNAME: www.greenpeace.org
+    CLOUDSQL_INSTANCE: planet4-prod
+    GCLOUD_CLUSTER: planet4-production
+    GOOGLE_PROJECT_ID: planet4-production
+    HELM_NAMESPACE: cidev
+    HELM_RELEASE: planet4-cidev-master
+    WP_DB_NAME: planet4-cidev_wordpress_master
+    WP_STATELESS_BUCKET: planet4-cidev-stateless
 
 
 commands:
