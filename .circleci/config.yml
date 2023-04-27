@@ -94,6 +94,7 @@ commands:
 job_definitions:
   build_steps: &build_steps
     working_directory: ~/
+    resource_class: xlarge
     steps:
       - setup_remote_docker:
           docker_layer_caching: false
