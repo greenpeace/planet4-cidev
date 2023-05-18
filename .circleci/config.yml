@@ -165,7 +165,7 @@ job_definitions:
             # Notify p4-activity-ci
             - slack/notify:
                 channel: C015MQGG3KQ
-                webhook: ${SLACK_NRO_WEBHOOK}
+
   finish_staging_steps: &finish_staging_steps
     working_directory: ~/
     steps:
@@ -259,7 +259,6 @@ jobs:
       - slack/notify:
           event: fail
           channel: C015MQGG3KQ
-          webhook: ${SLACK_NRO_WEBHOOK}
 
   build:
     <<: *defaults
