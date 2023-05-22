@@ -273,6 +273,50 @@ jobs:
       <<: *common_environment
       <<: *release_environment
     <<: *deploy_steps
+  
+  test-staging:
+    environment:
+      <<: *common_environment
+      <<: *release_environment
+    docker:
+      - image: cimg/node:16.19
+        auth:
+          <<: *docker_auth
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Clone develop repo
+          command: git clone https://github.com/greenpeace/planet4-develop.git .
+      - run:
+          name: Install dependencies
+          command: |
+            npm -g install @wordpress/env@5.16.0
+            npm install
+      - run:
+          name: Install develop environment
+          command: npm run env:install
+      - run:
+          name: Install e2e dependencies
+          command: npm run env:e2e-install
+      - run:
+          name: Run development environment
+          command: npm run env:start
+      - run:
+          name: Run tests
+          command: npm run env:e2e
+      - run:
+          name: Extract tests artifacts
+          command: |
+            mkdir -p /home/circleci/artifacts/playwright/results /home/circleci/artifacts/playwright/report
+            cp -r planet4/themes/planet4-master-theme/e2e-results/* /home/circleci/artifacts/playwright/results || true
+            cp -r uplanet4/themes/planet4-master-theme/e2e-report/* /home/circleci/artifacts/playwright/report || true
+            cp planet4/themes/planet4-master-theme/results.xml /home/circleci/artifacts/playwright/ || true
+      - store_test_results:
+          path: home/circleci/artifacts/playwright/
+      - store_artifacts:
+          path: home/circleci/artifacts/playwright/
+    
 
   finish-staging:
     <<: *defaults
@@ -441,6 +485,10 @@ workflows:
           requires:
             - build
             - visualtests-reference
+      - test-staging:
+          <<: *on_release_tag
+          requires:
+            - deploy-staging
       - visualtests-compare:
           <<: *on_release_tag
           notify: true
@@ -465,6 +513,7 @@ workflows:
           notify: true
           is_prod: true
           requires:
+            - test-staging
             - hold-production
   rollback:
     when: << pipeline.parameters.rollback >>
