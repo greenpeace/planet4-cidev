@@ -16,7 +16,7 @@ docker_auth: &docker_auth
 
 defaults: &defaults
   docker:
-    - image: greenpeaceinternational/p4-builder:latest
+    - image: greenpeaceinternational/p4-builder:robots-nro
       auth:
         <<: *docker_auth
 
@@ -485,10 +485,6 @@ workflows:
           requires:
             - build
             - visualtests-reference
-      - test-staging:
-          <<: *on_release_tag
-          requires:
-            - deploy-staging
       - visualtests-compare:
           <<: *on_release_tag
           notify: true
@@ -513,7 +509,6 @@ workflows:
           notify: true
           is_prod: true
           requires:
-            - test-staging
             - hold-production
   rollback:
     when: << pipeline.parameters.rollback >>
