@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$APP_ENVIRONMENT" = 'production' ]; then
+if [ "$APP_ENV" = "production" ]; then
   echo "Adjusting robots file for production"
   echo "User-agent: *" >source/public/robots.txt
   echo "Disallow: /wp-admin/" >>source/public/robots.txt
