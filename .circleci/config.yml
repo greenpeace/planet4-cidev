@@ -16,7 +16,7 @@ docker_auth: &docker_auth
 
 defaults: &defaults
   docker:
-    - image: greenpeaceinternational/p4-builder:sentry
+    - image: greenpeaceinternational/p4-builder:multiple-pods
       auth:
         <<: *docker_auth
 
