@@ -16,7 +16,7 @@ docker_auth: &docker_auth
 
 defaults: &defaults
   docker:
-    - image: greenpeaceinternational/p4-builder:latest
+    - image: greenpeaceinternational/p4-builder:restore-db
       auth:
         <<: *docker_auth
 
@@ -185,6 +185,7 @@ job_definitions:
               exit 0;
             fi
             make rollback
+
   rollback_steps: &rollback_steps
     working_directory: ~/
     steps:
@@ -194,6 +195,21 @@ job_definitions:
       - run: make copy
       - run: make persist
       - run: BUILD_TAG="${CIRCLE_TAG}" make deploy
+
+  rollback_db_steps: &rollback_db_steps
+    working_directory: ~/
+    steps:
+    - checkout
+    - run:
+        name: Configure
+        command: activate-gcloud-account.sh
+    - run:
+        name: Get keys
+        command: echo $SQLPROXY_KEY | base64 -d > key.json
+    - run:
+        name: Restore database
+        command: restore_db.sh
+        no_output_timeout: 20m
 
 jobs:
   build-develop:
@@ -287,6 +303,14 @@ jobs:
       <<: *common_environment
       <<: *release_environment
     <<: *rollback_steps
+
+  rollback-staging-db:
+    <<: *defaults
+    environment:
+      <<: *common_environment
+      <<: *release_environment
+    <<: *rollback_db_steps
+
   promote:
     <<: *defaults
     environment:
@@ -311,6 +335,13 @@ jobs:
       <<: *common_environment
       <<: *production_environment
     <<: *rollback_steps
+
+  rollback-production-db:
+    <<: *defaults
+    environment:
+      <<: *common_environment
+      <<: *production_environment
+    <<: *rollback_db_steps
 
   create-sync-sql:
     <<: *defaults
@@ -473,11 +504,29 @@ workflows:
     jobs:
       - rollback-staging:
           <<: *on_release_tag
+      - hold-staging-db:
+          <<: *on_release_tag
+          type: approval
+          requires:
+            - rollback-staging
+      - rollback-staging-db:
+          <<: *on_release_tag
+          requires:
+            - hold-staging-db
       - hold-production:
           <<: *on_release_tag
           type: approval
           requires:
             - rollback-staging
+      - hold-production-db:
+          <<: *on_release_tag
+          type: approval
+          requires:
+            - rollback-production
+      - rollback-production-db:
+          <<: *on_release_tag
+          requires:
+            - hold-production-db
       - rollback-production:
           <<: *on_release_tag
           requires:
