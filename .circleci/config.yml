@@ -197,7 +197,7 @@ job_definitions:
       - run: BUILD_TAG="${CIRCLE_TAG}" make deploy
 
   rollback_db_steps: &rollback_db_steps
-    working_directory: ~/
+    working_directory: /tmp/workspace/src
     steps:
     - checkout
     - run:
