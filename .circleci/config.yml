@@ -16,7 +16,7 @@ docker_auth: &docker_auth
 
 defaults: &defaults
   docker:
-    - image: greenpeaceinternational/p4-builder:restore-db
+    - image: greenpeaceinternational/p4-builder:latest
       auth:
         <<: *docker_auth
 
@@ -185,7 +185,6 @@ job_definitions:
               exit 0;
             fi
             make rollback
-
   rollback_steps: &rollback_steps
     working_directory: ~/
     steps:
@@ -303,7 +302,6 @@ jobs:
       <<: *common_environment
       <<: *release_environment
     <<: *rollback_steps
-
   promote:
     <<: *defaults
     environment:
@@ -506,15 +504,15 @@ workflows:
           <<: *on_release_tag
           type: approval
           requires:
-            - rollback-production
-      - rollback-production-db:
-          <<: *on_release_tag
-          requires:
-            - hold-production-db
+            - rollback-staging
       - rollback-production:
           <<: *on_release_tag
           requires:
             - hold-production
+      - rollback-production-db:
+          <<: *on_release_tag
+          requires:
+            - hold-production-db
 
   sync-from-production:
     triggers:
