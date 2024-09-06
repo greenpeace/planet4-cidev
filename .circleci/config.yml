@@ -304,13 +304,6 @@ jobs:
       <<: *release_environment
     <<: *rollback_steps
 
-  rollback-staging-db:
-    <<: *defaults
-    environment:
-      <<: *common_environment
-      <<: *release_environment
-    <<: *rollback_db_steps
-
   promote:
     <<: *defaults
     environment:
@@ -504,15 +497,6 @@ workflows:
     jobs:
       - rollback-staging:
           <<: *on_release_tag
-      - hold-staging-db:
-          <<: *on_release_tag
-          type: approval
-          requires:
-            - rollback-staging
-      - rollback-staging-db:
-          <<: *on_release_tag
-          requires:
-            - hold-staging-db
       - hold-production:
           <<: *on_release_tag
           type: approval
