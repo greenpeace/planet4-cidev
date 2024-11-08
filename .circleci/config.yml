@@ -33,7 +33,7 @@ job_environments:
     CLOUDSQL_INSTANCE: p4-develop-k8s
     GOOGLE_PROJECT_ID: planet-4-151612
     GCLOUD_CLUSTER: p4-development
-    HELM_NAMESPACE: cidev-development
+    HELM_NAMESPACE: cidev
     HELM_RELEASE: planet4-cidev
     WP_DB_NAME: planet4-cidev_wordpress_develop
     WP_STATELESS_BUCKET: planet4-cidev-stateless-develop
