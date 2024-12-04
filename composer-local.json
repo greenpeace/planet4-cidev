@@ -1,8 +1,5 @@
 {
   "name": "greenpeace/planet4-cidev",
   "description": "Greenpeace P4 cidev",
-  "license": "MIT",
-  "require": {
-    "greenpeace/planet4-nginx-helper" : "dev-upstream"
-  }
+  "license": "MIT"
 }
