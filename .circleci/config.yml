@@ -22,12 +22,12 @@ defaults: &defaults
 
 orbs:
   slack: circleci/slack@3.4.2
+
 job_environments:
   common_environment: &common_environment
     APP_HOSTPATH: cidev
     CONTAINER_PREFIX: planet4-cidev
     WP_DB_NAME_PREFIX: planet4-cidev_wordpress
-    GIT_REF: deactivate-blocks-plugin
   develop_environment: &develop_environment
     APP_ENVIRONMENT: development
     APP_HOSTNAME: www-dev.greenpeace.org
@@ -59,7 +59,6 @@ job_environments:
     HELM_RELEASE: planet4-cidev-master
     WP_DB_NAME: planet4-cidev_wordpress_master
     WP_STATELESS_BUCKET: planet4-cidev-stateless
-
 
 commands:
   approve_job:
