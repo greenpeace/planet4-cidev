@@ -16,7 +16,7 @@ docker_auth: &docker_auth
 
 defaults: &defaults
   docker:
-    - image: greenpeaceinternational/p4-builder:latest
+    - image: greenpeaceinternational/p4-builder:base-release
       auth:
         <<: *docker_auth
 
@@ -27,6 +27,7 @@ job_environments:
     APP_HOSTPATH: cidev
     CONTAINER_PREFIX: planet4-cidev
     WP_DB_NAME_PREFIX: planet4-cidev_wordpress
+    BASE_RELEASE: 25.18.0
   develop_environment: &develop_environment
     APP_ENVIRONMENT: development
     APP_HOSTNAME: www-dev.greenpeace.org
